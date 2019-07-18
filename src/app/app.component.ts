@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,219 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'zax-dashboard';
+  private mailboxPrefix = '_mailbox';
+
+  glow;
+  showRefreshLoader;
+  relay;
+  mailbox;
+  newMailbox = {};
+  relayURL: string;
+  editingURL: string;
+  newScreen = 'new';
+  quantity = 5;
+  isEditing: boolean;
+  activeMailbox = null;
+  mailboxes = [];
+  outgoingMessage = '';
+  outgoingRecipient = '';
+  pubKeyName = '';
+  pubKeyKey = '';
+  messageSent = false;
+  keyAdded = false;
+
+  constructor(private http: HttpClient) {
+    this.initGlow();
+    if (window.location.origin.indexOf('github.io') > -1) {
+      // Use test server by default when running on
+      // http://vault12.github.io/zax-dashboard/
+      this.relayURL = 'https://zax-test.vault12.com';
+    } else {
+      // Use current location otherwise
+      // NOTE: Take care not to mix up ports
+      // when both are running locally
+      this.relayURL = window.location.origin;
+    }
+    this.editingURL = this.relayURL;
+    this.initRelay(this.relayURL);
+    this.init();
+  }
+
+  private initGlow() {
+    this.glow = (window as any).glow;
+    this.mailbox = this.glow.MailBox;
+    this.glow.setAjaxImpl((url: string, data: string) => {
+      const request = this.http.post(url, data, {
+        headers: {
+          'Accept': 'text/plain',
+          'Content-Type': 'text/plain'
+        },
+        responseType: 'text'
+      });
+
+      return request.toPromise();
+    });
+  }
+
+  private initRelay(url: string) {
+    this.glow.CryptoStorage.startStorageSystem(new this.glow.SimpleStorageDriver());
+    this.relay = new this.glow.Relay(url);
+  }
+
+  async init() {
+    // add any mailbox stored in localStorage
+    for (const key of Object.keys(localStorage)) {
+      if (key.indexOf(this.mailboxPrefix) === 0) {
+        await this.initMailbox(localStorage.getItem(key));
+      }
+    }
+
+    this.refreshCounter();
+  }
+
+  async initMailbox(mailbox) {
+    await this.generateMailbox(mailbox);
+  }
+
+  selectMailbox(mailbox) {
+    this.activeMailbox = mailbox;
+    this.activeMailbox.recipients = Object.keys(mailbox.keyRing.guestKeys);
+    this.getMessages(mailbox);
+  }
+
+  async deleteMailbox(mailbox) {
+    await this.destroyMailbox(mailbox);
+    localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
+    this.activeMailbox = null;
+  }
+
+  async destroyMailbox(mailbox) {
+    const mbx = this.mailboxes.find(m => mailbox.keyRing.storage.root === m.keyRing.storage.root);
+    console.log(`Deleting mailbox ${mbx.identity}`);
+    await mbx.selfDestruct(true);
+    this.mailboxes = this.mailboxes.filter(m => mbx.keyRing.storage.root !== m.keyRing.storage.root);
+  }
+
+  updateRelay() {
+    this.relayURL = this.editingURL;
+    this.isEditing = false;
+    this.initRelay(this.relayURL);
+    this.refreshCounter();
+  }
+
+  addPublicKey(mailbox, name, pubKey) {
+    if (mailbox.keyRing.addGuest(name, pubKey)) {
+      this.keyAdded = true;
+      setTimeout(() => {
+        this.keyAdded = false;
+      }, 3000);
+      this.pubKeyName = '';
+      this.pubKeyKey = '';
+    }
+  }
+
+  async addMailbox(name, options?, noRefresh?) {
+    const mbx = await this.generateMailbox(name, options);
+    localStorage.setItem(`${this.mailboxPrefix}.${name}`, mbx.identity);
+    if (!noRefresh) {
+      this.refreshCounter();
+    }
+  }
+
+  async addMailboxes(amount: number = 5) {
+    // sort names randomly
+    const firstNames = ['Alice', 'Bob', 'Charlie', 'Chuck', 'Dave', 'Erin',
+      'Eve', 'Faith', 'Frank', 'Mallory', 'Oscar', 'Peggy', 'Pat', 'Sam',
+      'Sally', 'Sybil', 'Trent', 'Trudy', 'Victor', 'Walter', 'Wendy']
+      .sort(() => .5 - Math.random()).slice(0, amount);
+
+    for (let name of firstNames) {
+      // check if name is on the list already
+      const i = this.mailboxes.filter(m => m.identity.indexOf(name) > -1).length + 1;
+      if (i > 1) {
+        name = `${name} ${i}`;
+      }
+      this.addMailbox(name, null, true);
+    }
+    this.refreshCounter();
+  }
+
+  private async generateMailbox(name, options?) {
+    let mbx = null;
+    if (!options) {
+      mbx = await this.mailbox.new(name);
+    } else if (options.secret) {
+      mbx = await this.mailbox.fromSecKey(options.secret.fromBase64(), name);
+    } else if (options.seed) {
+      mbx = await this.mailbox.fromSeed(options.seed, name);
+    } else {
+      console.error('Error: incorrect options');
+    }
+
+    // share keys among mailboxes
+    for (const m of this.mailboxes) {
+      await mbx.keyRing.addGuest(m.identity, m.getPubCommKey());
+      await m.keyRing.addGuest(mbx.identity, mbx.getPubCommKey());
+    }
+
+    this.mailboxes.push(mbx);
+
+    return mbx;
+  }
+
+  async refreshCounter() {
+    if (!this.mailboxes.length) {
+      return;
+    }
+    this.showRefreshLoader = true;
+    for (const mbx of this.mailboxes) {
+      await this.messageCount(mbx);
+    }
+    this.showRefreshLoader = false;
+  }
+
+  async messageCount(mailbox): Promise<number> {
+    await mailbox.connectToRelay(this.relay);
+    const count = await mailbox.relayCount(this.relay);
+    mailbox.messageCount = count;
+    return count;
+  }
+
+  async getMessages(mailbox) {
+    const messages = await mailbox.getRelayMessages(this.relay);
+    mailbox.messages = [];
+    mailbox.messagesNonces = [];
+    for (const msg of messages) {
+      if (msg.kind === 'file') {
+        msg.data = '📎 File [uploadID: ' + JSON.parse(msg.data).uploadID + ']';
+      }
+      mailbox.messagesNonces.push(msg.nonce);
+      mailbox.messages.push(msg);
+    }
+  }
+
+  async sendMessage(mailbox, recipient, message) {
+    if (!recipient) {
+      return;
+    }
+    await mailbox.sendToVia(recipient, this.relay, message);
+    this.messageSent = true;
+    setTimeout(() => {
+      this.messageSent = false;
+    }, 3000);
+  }
+
+  async deleteMessages(mailbox, messagesToDelete = null) {
+    const noncesToDelete = messagesToDelete || mailbox.messagesNonces || [];
+    for (const nonce of noncesToDelete) {
+      await mailbox.connectToRelay(this.relay);
+      await mailbox.relayDelete(noncesToDelete, this.relay);
+      const index = mailbox.messagesNonces.indexOf(nonce);
+      mailbox.messagesNonces.splice(index, 1);
+      mailbox.messages.splice(index, 1);
+    }
+
+    // Update counter without polling server
+    mailbox.messageCount = Object.keys(mailbox.messages).length;
+  }
 }

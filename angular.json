@@ -26,7 +26,10 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/js-nacl/lib/nacl_factory.js",
+              "node_modules/theglow/dist/theglow.min.js"
+            ]
           },
           "configurations": {
             "production": {
