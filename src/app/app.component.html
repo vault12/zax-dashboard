@@ -168,7 +168,7 @@
             </thead>
             <tr *ngFor="let message of activeMailbox.messages">
               <td>
-                <div class="overflow-box" (click)="selectText(e)">{{message.fromTag || message.from}}</div>
+                <div class="overflow-box">{{message.fromTag || message.from}}</div>
               </td>
               <td>
                 <div class="overflow-box">{{message.nonce}}</div>

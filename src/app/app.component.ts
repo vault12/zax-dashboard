@@ -13,12 +13,13 @@ export class AppComponent {
   showRefreshLoader;
   relay;
   mailbox;
-  newMailbox = {};
+  newMailbox = { name: '', seed: '', secret: '' };
   relayURL: string;
   editingURL: string;
   newScreen = 'new';
   quantity = 5;
   isEditing: boolean;
+  subscreen;
   activeMailbox = null;
   mailboxes = [];
   outgoingMessage = '';
