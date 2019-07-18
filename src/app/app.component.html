@@ -40,7 +40,7 @@
 <div class="container">
   <div class="row">
     <div class="col-sm-4 col-md-3">
-      <div *ngIf="mailboxes">
+      <div *ngIf="mailboxes.length">
         <button class="btn btn-success btn-narrow float-right mb-2" type="button" (click)="refreshCounter()">⟳
           Refresh</button>
         <div class="loader float-right mr-2" *ngIf="showRefreshLoader"></div>
@@ -57,7 +57,7 @@
           </li>
         </ul>
       </div>
-      <button type="button" class="btn btn-block btn-outline-success" *ngIf="mailboxes" (click)="activeMailbox = null">+
+      <button type="button" class="btn btn-block btn-outline-success" *ngIf="mailboxes.length" (click)="activeMailbox = null">+
         Add</button>
     </div>
 
