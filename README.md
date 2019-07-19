@@ -25,7 +25,7 @@ cd zax-dashboard
 npm install
 
 # run the dev server
-ng serve
+npm run start
 ```
 
 Then navigate to `http://localhost:4200` in your browser. The app will automatically reload if you change any of the source files.
