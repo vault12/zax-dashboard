@@ -36,6 +36,10 @@ export class AppComponent {
 
   constructor(private http: HttpClient) {
     this.initGlow();
+
+  }
+
+  ngOnInit() {
     this.setDefaultRelay();
     this.initRelay(this.relayURL);
     this.initMailboxes();
@@ -47,7 +51,10 @@ export class AppComponent {
 
   private initGlow() {
     this.glow = (window as any).glow;
+    this.glow.CryptoStorage.startStorageSystem(new this.glow.SimpleStorageDriver());
+
     this.mailbox = this.glow.MailBox;
+
     this.glow.setAjaxImpl((url: string, data: string) => {
       const request = this.http.post(url, data, {
         headers: {
@@ -71,21 +78,29 @@ export class AppComponent {
       // NOTE: Take care not to mix up ports
       // when both are running locally
       this.relayURL = window.location.origin;
+      // this.relayURL = 'https://zax-test.vault12.com';
     }
     this.editingURL = this.relayURL;
   }
 
   private initRelay(url: string) {
-    this.glow.CryptoStorage.startStorageSystem(new this.glow.SimpleStorageDriver());
     this.relay = new this.glow.Relay(url);
   }
 
   async initMailboxes() {
     // add all mailboxes stored in localStorage
-    for (const key of Object.keys(localStorage)) {
+    var mbx_count = 0
+    var localKeys = Object.keys(localStorage)
+    for (const key of localKeys) {
       if (key.indexOf(this.mailboxPrefix) === 0) {
+        mbx_count++
         await this.generateMailbox(localStorage.getItem(key));
       }
+    }
+    if (mbx_count == 0)
+    {
+      await this.addMailbox('Alice',null, true)
+      await this.addMailbox('Bob',  null, true)
     }
     this.refreshCounter();
   }
