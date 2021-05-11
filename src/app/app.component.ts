@@ -70,15 +70,12 @@ export class AppComponent {
 
   private setDefaultRelay() {
     if (window.location.origin.indexOf('github.io') > -1) {
-      // Use test server by default when running on
-      // http://vault12.github.io/zax-dashboard/
-      this.relayURL = 'https://zax-test.vault12.com';
+      // Use test server by default when running on http://vault12.github.io/zax-dashboard/
+      this.relayURL = 'https://z.vault12.com';
     } else {
       // Use current location otherwise
-      // NOTE: Take care not to mix up ports
-      // when both are running locally
+      // NOTE: Take care not to mix up ports when both are running locally
       this.relayURL = window.location.origin;
-      // this.relayURL = 'https://zax-test.vault12.com';
     }
     this.editingURL = this.relayURL;
   }
