@@ -50,10 +50,10 @@
         <ul class="list-group mb-4">
           <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
             *ngFor="let mailbox of mailboxes" (click)="selectMailbox(mailbox); viewMailboxSubscreen = 'inbox'"
-            [ngClass]="{'active': mailbox == activeMailbox}">
+            [ngClass]="{'active': mailbox === activeMailbox}">
             {{ mailbox.identity }}
             <span class="badge rounded-pill"
-              [ngClass]="{'bg-success': mailbox.messageCount > 0, 'bg-secondary': mailbox.messageCount == 0}">
+              [ngClass]="{'bg-success': mailbox.messageCount > 0, 'bg-secondary': mailbox.messageCount === 0}">
               {{ mailbox.messageCount }}</span>
           </li>
         </ul>
@@ -72,42 +72,42 @@
         <hr />
         <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen == 'new'}" href="#"
+            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'new'}" href="#"
               (click)="newMailboxSubscreen = 'new'">New</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen == 'seed'}" href="#"
+            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'seed'}" href="#"
               (click)="newMailboxSubscreen = 'seed'">From
               Seed</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen == 'secret'}" href="#"
+            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'secret'}" href="#"
               (click)="newMailboxSubscreen = 'secret'">From Secret key</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen == 'multiple'}" href="#"
+            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'multiple'}" href="#"
               (click)="newMailboxSubscreen = 'multiple'">Multiple</a>
           </li>
         </ul>
 
-        <div class="mt-4" *ngIf="newMailboxSubscreen != 'multiple'">
+        <div class="mt-4" *ngIf="newMailboxSubscreen !== 'multiple'">
           <div class="d-grid gap-4">
             <input type="text" class="form-control" [(ngModel)]="newMailbox.name" placeholder="Mailbox name">
-            <input type="text" class="form-control" *ngIf="newMailboxSubscreen == 'seed'"
+            <input type="text" class="form-control" *ngIf="newMailboxSubscreen === 'seed'"
               [(ngModel)]="newMailbox.seed" placeholder="Seed">
-            <input type="text" class="form-control" *ngIf="newMailboxSubscreen == 'secret'"
+            <input type="text" class="form-control" *ngIf="newMailboxSubscreen === 'secret'"
               [(ngModel)]="newMailbox.secret" placeholder="Secret">
 
-            <button class="btn btn-success" *ngIf="newMailboxSubscreen == 'new'" type="button"
+            <button class="btn btn-success" *ngIf="newMailboxSubscreen === 'new'" type="button"
               (click)="addMailbox(newMailbox.name)">Add</button>
-            <button class="btn btn-success" *ngIf="newMailboxSubscreen == 'seed'" type="button"
+            <button class="btn btn-success" *ngIf="newMailboxSubscreen === 'seed'" type="button"
               (click)="addMailbox(newMailbox.name, {seed:newMailbox.seed})">Add</button>
-            <button class="btn btn-success" *ngIf="newMailboxSubscreen == 'secret'" type="button"
+            <button class="btn btn-success" *ngIf="newMailboxSubscreen === 'secret'" type="button"
               (click)="addMailbox(newMailbox.name, {secret:newMailbox.secret})">Add</button>
           </div>
         </div>
 
-        <div class="mt-4" *ngIf="newMailboxSubscreen == 'multiple'">
+        <div class="mt-4" *ngIf="newMailboxSubscreen === 'multiple'">
           <div class="d-grid gap-4">
             <select class="form-select" [(ngModel)]="quantity">
               <option value="2">2</option>
@@ -148,21 +148,21 @@
 
       <ul class="nav nav-tabs">
         <li class="nav-item">
-          <a class="nav-link active" [ngClass]="{'active': viewMailboxSubscreen == 'inbox'}"
+          <a class="nav-link active" [ngClass]="{'active': viewMailboxSubscreen === 'inbox'}"
             (click)="viewMailboxSubscreen = 'inbox'" href="#">Inbox</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [ngClass]="{'active': viewMailboxSubscreen == 'sendMessage'}"
+          <a class="nav-link" [ngClass]="{'active': viewMailboxSubscreen === 'sendMessage'}"
             (click)="viewMailboxSubscreen = 'sendMessage'" href="#">Send a message</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [ngClass]="{'active': viewMailboxSubscreen == 'addKey'}"
+          <a class="nav-link" [ngClass]="{'active': viewMailboxSubscreen === 'addKey'}"
             (click)="viewMailboxSubscreen = 'addKey'" href="#">Add public key</a>
         </li>
       </ul>
 
-      <div class="row" *ngIf="viewMailboxSubscreen == 'inbox'">
-        <div class="col" *ngIf="activeMailbox.messageCount == 0">
+      <div class="row" *ngIf="viewMailboxSubscreen === 'inbox'">
+        <div class="col" *ngIf="activeMailbox.messageCount === 0">
           <h2 class="text-center mt-5 text-muted">No messages</h2>
         </div>
         <div class="col" *ngIf="activeMailbox.messageCount > 0">
@@ -206,7 +206,7 @@
         </div>
       </div>
 
-      <div class="row" *ngIf="viewMailboxSubscreen == 'sendMessage'">
+      <div class="row" *ngIf="viewMailboxSubscreen === 'sendMessage'">
         <div class="col-sm-6">
           <span class="badge bg-success" [ngClass]="{'badge-show': messageSent}">Message sent!</span>
           <div class="d-grid gap-2">
@@ -222,7 +222,7 @@
         </div>
       </div>
 
-      <div class="row" *ngIf="viewMailboxSubscreen == 'addKey'">
+      <div class="row" *ngIf="viewMailboxSubscreen === 'addKey'">
         <div class="col-sm-6">
           <span class="badge bg-success" [ngClass]="{'badge-show': keyAdded}">Key added!</span>
           <div class="d-grid gap-2">
