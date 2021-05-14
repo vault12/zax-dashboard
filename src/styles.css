@@ -1,12 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import '../node_modules/bootswatch/dist/sandstone/bootstrap.min.css';
-.navbar .form-inline input {
+
+.navbar input {
   width: 300px;
 }
 
 table.table {
-  width: 100%;
   table-layout: fixed;
 }
 
@@ -70,8 +70,4 @@ div.overflow-box:hover {
   100% {
     transform: rotate(360deg);
   }
-}
-
-.btn-narrow {
-  line-height: 14px;
 }
