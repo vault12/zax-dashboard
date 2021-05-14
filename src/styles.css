@@ -1,11 +1,3 @@
-/* You can add global styles to this file, and also import other style files */
-
-@import '../node_modules/bootswatch/dist/sandstone/bootstrap.min.css';
-
-.navbar input {
-  width: 300px;
-}
-
 table.table {
   table-layout: fixed;
 }
@@ -52,22 +44,4 @@ div.overflow-box:hover {
 
 .list-group-item {
   cursor: pointer;
-}
-
-.loader {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #79a736;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }

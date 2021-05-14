@@ -1,19 +1,19 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container">
     <a class="navbar-brand" href="#">Zax Relay</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar1" aria-controls="navbar1"
-      aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse d-flex" id="navbar1">
-      <form class="d-flex">
-        <div *ngIf="!isEditing">
+    <div class="navbar-collapse collapse d-lg-flex" id="navbar1">
+      <form class="d-flex flex-fill my-3 my-lg-0">
+        <div class="flex-fill" *ngIf="!isEditing">
           <label for="relayURL" class="visually-hidden">Relay URL</label>
           <input type="text" readonly class="form-control ml-sm-4 mr-sm-2" name="relayURL" placeholder="Relay URL"
             id="relayURL" [(ngModel)]="relayURL">
         </div>
-        <div *ngIf="isEditing">
+        <div class="flex-fill" *ngIf="isEditing">
           <label for="relayURL2" class="visually-hidden">Relay URL</label>
           <input type="text" class="form-control ml-sm-4 mr-sm-2" name="relayURL2" id="relayURL2"
             placeholder="Relay URL" [(ngModel)]="editingURL">
@@ -22,7 +22,7 @@
         <button class="btn btn-secondary my-0 ms-2"
           (click)="isEditing = !isEditing">{{ isEditing ? 'Cancel' : 'Change' }}</button>
       </form>
-      <ul class="navbar-nav me-auto flex-fill flex-fill justify-content-end">
+      <ul class="navbar-nav flex-fill justify-content-end align-items-center">
         <li class="nav-item">
           <a class="nav-link" href="http://bit.ly/nacl_relay_spec" target="_blank">Technical spec</a>
         </li>
@@ -41,10 +41,14 @@
   <div class="row">
     <div class="col-sm-4 col-md-3">
       <div *ngIf="mailboxes.length">
-        <div class="d-flex align-items-center mb-3">
+        <div class="d-flex d-sm-block d-xl-flex align-items-center mb-3">
           <h4 class="flex-fill mb-0">Mailboxes</h4>
-          <div class="loader me-2" *ngIf="showRefreshLoader"></div>
-          <button class="btn btn-success" type="button" (click)="refreshCounter()">⟳ Refresh</button>
+          <button class="btn btn-success mt-sm-2 mt-xl-0" type="button" (click)="refreshCounter()">
+            <span *ngIf="!showRefreshLoader">⟳</span>
+            <span *ngIf="showRefreshLoader" class="spinner-border spinner-border-sm"
+              role="status" aria-hidden="true"></span>
+            Refresh
+          </button>
         </div>
 
         <ul class="list-group mb-4">
@@ -66,9 +70,9 @@
       </div>
     </div>
 
-    <div class="col-sm-8 col-md-9" *ngIf="!activeMailbox">
+    <div class="col-sm-8 col-md-9 my-5 my-sm-0" *ngIf="!activeMailbox">
       <h2 class="text-center align-middle mt-8 mt-4 text-muted">No mailbox selected</h2>
-      <div class="col-md-6 offset-md-3">
+      <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
         <hr />
         <ul class="nav nav-tabs">
           <li class="nav-item">
@@ -77,8 +81,7 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'seed'}" href="#"
-              (click)="newMailboxSubscreen = 'seed'">From
-              Seed</a>
+              (click)="newMailboxSubscreen = 'seed'">From Seed</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'secret'}" href="#"
@@ -123,7 +126,7 @@
       </div>
     </div>
 
-    <div class="col-sm-8 col-md-9" *ngIf="activeMailbox">
+    <div class="col-sm-8 col-md-9 my-5 my-sm-0" *ngIf="activeMailbox">
       <div class="d-flex align-items-center">
         <h4 class="flex-fill mb-0">{{ activeMailbox.identity }}</h4>
         <button class="btn btn-danger" (click)="deleteMailbox(activeMailbox)">Delete Mailbox</button>
