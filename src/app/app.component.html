@@ -71,43 +71,48 @@
     </div>
 
     <div class="col-sm-8 col-md-9 my-5 my-sm-0" *ngIf="!activeMailbox">
-      <h2 class="text-center align-middle mt-8 mt-4 text-muted">No mailbox selected</h2>
+      <h2 class="text-center align-middle my-4 text-muted">No mailbox selected</h2>
       <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
         <hr />
         <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'new'}" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'new'" href="#"
               (click)="newMailboxSubscreen = 'new'">New</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'seed'}" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'seed'" href="#"
               (click)="newMailboxSubscreen = 'seed'">From Seed</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'secret'}" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'secret'" href="#"
               (click)="newMailboxSubscreen = 'secret'">From Secret key</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [ngClass]="{'active': newMailboxSubscreen === 'multiple'}" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'multiple'" href="#"
               (click)="newMailboxSubscreen = 'multiple'">Multiple</a>
           </li>
         </ul>
 
         <div class="mt-4" *ngIf="newMailboxSubscreen !== 'multiple'">
-          <div class="d-grid gap-4">
-            <input type="text" class="form-control" [(ngModel)]="newMailbox.name" placeholder="Mailbox name">
-            <input type="text" class="form-control" *ngIf="newMailboxSubscreen === 'seed'"
-              [(ngModel)]="newMailbox.seed" placeholder="Seed">
-            <input type="text" class="form-control" *ngIf="newMailboxSubscreen === 'secret'"
-              [(ngModel)]="newMailbox.secret" placeholder="Secret">
+          <form class="d-grid gap-3 needs-validation" #newMailboxForm="ngForm" novalidate
+            [class.was-validated]="newMailboxForm.submitted && newMailboxForm.touched"
+            (submit)="createMailbox(newMailboxForm, newMailboxSubscreen)">
+            <div class="input-group has-validation">
+              <input type="text" class="form-control" name="name" ngModel placeholder="Mailbox name" required>
+              <div class="invalid-feedback">Sorry, the mailbox name can't be empty</div>
+            </div>
+            <div class="input-group has-validation" *ngIf="newMailboxSubscreen === 'seed'">
+              <input type="text" class="form-control" name="seed" ngModel placeholder="Seed" required>
+              <div class="invalid-feedback">Sorry, the seed can't be empty</div>
+            </div>
 
-            <button class="btn btn-success" *ngIf="newMailboxSubscreen === 'new'" type="button"
-              (click)="addMailbox(newMailbox.name)">Add</button>
-            <button class="btn btn-success" *ngIf="newMailboxSubscreen === 'seed'" type="button"
-              (click)="addMailbox(newMailbox.name, {seed:newMailbox.seed})">Add</button>
-            <button class="btn btn-success" *ngIf="newMailboxSubscreen === 'secret'" type="button"
-              (click)="addMailbox(newMailbox.name, {secret:newMailbox.secret})">Add</button>
-          </div>
+            <div class="input-group has-validation" *ngIf="newMailboxSubscreen === 'secret'">
+              <input type="text" class="form-control" name="secret" ngModel placeholder="Secret" required>
+              <div class="invalid-feedback">Sorry, the secret can't be empty</div>
+            </div>
+
+            <button class="btn btn-success" type="submit" [disabled]="!newMailboxForm.valid">Add</button>
+          </form>
         </div>
 
         <div class="mt-4" *ngIf="newMailboxSubscreen === 'multiple'">

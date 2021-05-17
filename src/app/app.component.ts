@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -30,7 +31,6 @@ export class AppComponent implements OnInit {
   quantity = 5;
 
   // Input defaults
-  newMailbox = { name: '', seed: '', secret: '' };
   newMessage = { message: '', recipient: '' };
   newPubKey = { name: '', key: '' };
 
@@ -118,7 +118,26 @@ export class AppComponent implements OnInit {
   // Mailboxes
   // -------------------------
 
-  async addMailbox(name, options?, noRefresh?: boolean) {
+  async createMailbox(form: NgForm, type: string) {
+    const { name, seed, secret } = form.controls;
+    switch (type) {
+      case 'new':
+        await this.addMailbox(name.value);
+        break;
+      case 'secret':
+        await this.addMailbox(name.value, { secret: secret.value });
+        break;
+      case 'seed':
+        await this.addMailbox(name.value, { seed: seed.value });
+        break;
+      default:
+        throw new Error('Mailbox: unknown constructor type');
+    }
+
+    form.reset();
+  }
+
+  private async addMailbox(name: string, options?, noRefresh?: boolean) {
     const mbx = await this.generateMailbox(name, options);
     localStorage.setItem(`${this.mailboxPrefix}.${name}`, mbx.identity);
     if (!noRefresh) {
@@ -126,7 +145,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private async generateMailbox(name, options?) {
+  private async generateMailbox(name: string, options?) {
     let mbx = null;
     if (!options) {
       mbx = await this.mailbox.new(name);
