@@ -44,7 +44,6 @@
         <div class="d-flex d-sm-block d-xl-flex align-items-center mb-3">
           <h4 class="flex-fill mb-0">Mailboxes</h4>
           <button class="btn btn-success mt-sm-2 mt-xl-0" type="button" (click)="refreshCounter()">
-            <span *ngIf="!showRefreshLoader">⟳</span>
             <span *ngIf="showRefreshLoader" class="spinner-border spinner-border-sm"
               role="status" aria-hidden="true"></span>
             Refresh
@@ -175,8 +174,10 @@
         </div>
         <div class="col" *ngIf="activeMailbox.messageCount > 0">
           <div class="d-flex align-items-center justify-content-between my-4">
-            <button class="btn btn-success" type="button" (click)="getMessages(activeMailbox)">Fetch
-              All</button>
+            <button class="btn btn-success" type="button" (click)="getMessages(activeMailbox)">
+              <span *ngIf="showMessagesLoader" class="spinner-border spinner-border-sm"
+                role="status" aria-hidden="true"></span>
+              Fetch All</button>
             <button class="btn btn-danger" type="button"
               (click)="deleteMessages(activeMailbox)">Delete All</button>
           </div>
@@ -185,31 +186,27 @@
             <thead>
               <tr>
                 <th>From</th>
-                <th>Nonce</th>
-                <th>Time</th>
                 <th>Message</th>
                 <th></th>
               </tr>
             </thead>
-            <tr *ngFor="let message of activeMailbox.messages">
-              <td>
-                <div class="overflow-box">{{message.fromTag || message.from}}</div>
-              </td>
-              <td>
-                <div class="overflow-box">{{message.nonce}}</div>
-              </td>
-              <td>
-                <div class="overflow-box">{{message.time * 1000 | date:'short'}}</div>
-              </td>
-              <td>
-                <div class="overflow-wrap">{{message.msg || message.data}}</div>
-              </td>
-              <td>
-                <button class="btn btn-outline-danger" (click)="deleteMessages(activeMailbox, [message.nonce])">
-                  <i class="glyphicon glyphicon-remove"></i> Delete
-                </button>
-              </td>
-            </tr>
+            <tbody>
+              <tr *ngFor="let message of activeMailbox.messages">
+                <td>{{ message.fromTag || message.from }}</td>
+                <td>
+                  <textarea readonly class="form-control">{{ message.msg || message.data }}</textarea>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <small class="text-muted">Nonce: {{ message.nonce }}</small>
+                    <small class="text-muted">Time: {{ message.time * 1000 | date:'short' }}</small>
+                  </div>
+                </td>
+                <td>
+                  <button class="btn btn-outline-danger" (click)="deleteMessages(activeMailbox, [message.nonce])">
+                    <i class="glyphicon glyphicon-remove"></i> Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>

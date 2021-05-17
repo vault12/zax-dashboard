@@ -1,0 +1,13 @@
+.badge {
+  transition: opacity 1s ease-in-out;
+  margin: 5px 0;
+  opacity: 0;
+}
+
+.list-group .badge, .badge-show {
+  opacity: 1;
+}
+
+.list-group-item {
+  cursor: pointer;
+}

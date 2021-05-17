@@ -19,6 +19,7 @@ export class AppComponent implements OnInit {
 
   // UI flags
   showRefreshLoader = false;
+  showMessagesLoader = false;
   messageSent = false;
   keyAdded = false;
   isEditing = false;
@@ -234,6 +235,7 @@ export class AppComponent implements OnInit {
   }
 
   async getMessages(mailbox) {
+    this.showMessagesLoader = true;
     const messages = await mailbox.getRelayMessages(this.relay);
     mailbox.messages = [];
     mailbox.messagesNonces = [];
@@ -244,6 +246,7 @@ export class AppComponent implements OnInit {
       mailbox.messagesNonces.push(msg.nonce);
       mailbox.messages.push(msg);
     }
+    this.showMessagesLoader = false;
   }
 
   async sendMessage(mailbox, form: NgForm) {
