@@ -30,10 +30,6 @@ export class AppComponent implements OnInit {
   viewMailboxSubscreen = 'inbox';
   quantity = 5;
 
-  // Input defaults
-  newMessage = { message: '', recipient: '' };
-  newPubKey = { name: '', key: '' };
-
   constructor(private http: HttpClient) {
     this.initGlow();
 
@@ -75,7 +71,7 @@ export class AppComponent implements OnInit {
     } else {
       // Use current location otherwise
       // NOTE: Take care not to mix up ports when both are running locally
-      this.relayURL = window.location.origin;
+      this.relayURL = 'https://z2.vault12.com'; //window.location.origin;
     }
     this.editingURL = this.relayURL;
   }
@@ -209,14 +205,15 @@ export class AppComponent implements OnInit {
   // Glow operations
   // -------------------------
 
-  addPublicKey(mailbox, name, pubKey) {
-    if (mailbox.keyRing.addGuest(name, pubKey)) {
+  addPublicKey(mailbox, form: NgForm) {
+    const { name, key } = form.controls;
+    if (mailbox.keyRing.addGuest(name.value, key.value)) {
       this.keyAdded = true;
       setTimeout(() => {
         this.keyAdded = false;
       }, 3000);
-      this.newPubKey = { name: '', key: '' };
     }
+    form.reset();
   }
 
   async refreshCounter() {
@@ -249,16 +246,14 @@ export class AppComponent implements OnInit {
     }
   }
 
-  async sendMessage(mailbox, recipient, message) {
-    if (!recipient) {
-      return;
-    }
-    await mailbox.sendToVia(recipient, this.relay, message);
+  async sendMessage(mailbox, form: NgForm) {
+    const { recipient, message } = form.controls;
+    await mailbox.sendToVia(recipient.value, this.relay, message.value);
     this.messageSent = true;
     setTimeout(() => {
       this.messageSent = false;
     }, 3000);
-    this.newMessage = { message: '', recipient: '' };
+    form.reset();
     this.refreshCounter();
   }
 

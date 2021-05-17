@@ -217,28 +217,29 @@
       <div class="row" *ngIf="viewMailboxSubscreen === 'sendMessage'">
         <div class="col-sm-6">
           <span class="badge bg-success" [ngClass]="{'badge-show': messageSent}">Message sent!</span>
-          <div class="d-grid gap-2">
-            <select type="text" [(ngModel)]="newMessage.recipient" class="form-select">
+          <form class="d-grid gap-2 needs-validation" #messageForm="ngForm" novalidate
+            [class.was-validated]="messageForm.submitted && messageForm.touched"
+            (submit)="sendMessage(activeMailbox, messageForm)">
+            <select type="text" name="recipient" ngModel class="form-select" required>
               <option value="" disabled selected>Recipient</option>
               <option *ngFor="let guest of activeMailbox.recipients" value="{{ guest }}">{{ guest }}</option>
             </select>
-            <textarea [(ngModel)]="newMessage.message" placeholder="Message" rows="3"
-              class="form-control"></textarea>
-            <button class="btn btn-success" type="button"
-              (click)="sendMessage(activeMailbox, newMessage.recipient, newMessage.message)">Send</button>
-          </div>
+            <textarea ngModel name="message" placeholder="Message" rows="3" required class="form-control"></textarea>
+            <button class="btn btn-success" type="submit" [disabled]="!messageForm.valid">Send</button>
+          </form>
         </div>
       </div>
 
       <div class="row" *ngIf="viewMailboxSubscreen === 'addKey'">
         <div class="col-sm-6">
           <span class="badge bg-success" [ngClass]="{'badge-show': keyAdded}">Key added!</span>
-          <div class="d-grid gap-2">
-            <input type="text" [(ngModel)]="newPubKey.name" placeholder="User Name" class="form-control">
-            <input type="text" [(ngModel)]="newPubKey.key" placeholder="Public Key (Base64)" class="form-control">
-            <button class="btn btn-success" type="button"
-              (click)="addPublicKey(activeMailbox, newPubKey.name, newPubKey.key)">Add</button>
-          </div>
+          <form class="d-grid gap-2 needs-validation" #keyForm="ngForm" novalidate
+            [class.was-validated]="keyForm.submitted && keyForm.touched"
+            (submit)="addPublicKey(activeMailbox, keyForm)">
+            <input type="text" ngModel name="name" placeholder="User Name" class="form-control" required>
+            <input type="text" ngModel name="key" placeholder="Public Key (Base64)" class="form-control" required>
+            <button class="btn btn-success" type="submit" [disabled]="!keyForm.valid">Add</button>
+          </form>
         </div>
       </div>
     </div>
