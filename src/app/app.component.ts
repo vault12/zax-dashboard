@@ -228,6 +228,10 @@ export class AppComponent implements OnInit {
     this.showRefreshLoader = false;
   }
 
+  checkAll(event: { target: HTMLInputElement }) {
+    this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
+  }
+
   async messageCount(mailbox) {
     await mailbox.connectToRelay(this.relay);
     const count = await mailbox.relayCount(this.relay);
@@ -238,12 +242,10 @@ export class AppComponent implements OnInit {
     this.showMessagesLoader = true;
     const messages = await mailbox.getRelayMessages(this.relay);
     mailbox.messages = [];
-    mailbox.messagesNonces = [];
     for (const msg of messages) {
       if (msg.kind === 'file') {
         msg.data = '📎 File [uploadID: ' + JSON.parse(msg.data).uploadID + ']';
       }
-      mailbox.messagesNonces.push(msg.nonce);
       mailbox.messages.push(msg);
     }
     this.showMessagesLoader = false;
@@ -260,15 +262,13 @@ export class AppComponent implements OnInit {
     this.refreshCounter();
   }
 
-  async deleteMessages(mailbox, messagesToDelete = null) {
-    const noncesToDelete = messagesToDelete || mailbox.messagesNonces || [];
-    for (const nonce of noncesToDelete) {
-      await mailbox.connectToRelay(this.relay);
-      await mailbox.relayDelete(noncesToDelete, this.relay);
-      const index = mailbox.messagesNonces.indexOf(nonce);
-      mailbox.messagesNonces.splice(index, 1);
-      mailbox.messages.splice(index, 1);
-    }
+  async deleteMessages(mailbox) {
+    const noncesToDelete = mailbox.messages.filter(message => message.isSelected)
+      .map(message => message.nonce);
+    await mailbox.connectToRelay(this.relay);
+    await mailbox.relayDelete(noncesToDelete, this.relay);
+
+    mailbox.messages = mailbox.messages.filter(message => !message.isSelected);
 
     // Update counter without polling server
     mailbox.messageCount = Object.keys(mailbox.messages).length;

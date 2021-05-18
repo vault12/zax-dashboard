@@ -8,6 +8,6 @@
   opacity: 1;
 }
 
-.list-group-item {
+.list-group-item, .nav-link {
   cursor: pointer;
 }

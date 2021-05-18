@@ -75,19 +75,19 @@
         <hr />
         <ul class="nav nav-tabs">
           <li class="nav-item">
-            <a class="nav-link" [class.active]="newMailboxSubscreen === 'new'" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'new'"
               (click)="newMailboxSubscreen = 'new'">New</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [class.active]="newMailboxSubscreen === 'seed'" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'seed'"
               (click)="newMailboxSubscreen = 'seed'">From Seed</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [class.active]="newMailboxSubscreen === 'secret'" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'secret'"
               (click)="newMailboxSubscreen = 'secret'">From Secret key</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" [class.active]="newMailboxSubscreen === 'multiple'" href="#"
+            <a class="nav-link" [class.active]="newMailboxSubscreen === 'multiple'"
               (click)="newMailboxSubscreen = 'multiple'">Multiple</a>
           </li>
         </ul>
@@ -156,15 +156,15 @@
       <ul class="nav nav-tabs">
         <li class="nav-item">
           <a class="nav-link active" [ngClass]="{'active': viewMailboxSubscreen === 'inbox'}"
-            (click)="viewMailboxSubscreen = 'inbox'" href="#">Inbox</a>
+            (click)="viewMailboxSubscreen = 'inbox'">Inbox</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [ngClass]="{'active': viewMailboxSubscreen === 'sendMessage'}"
-            (click)="viewMailboxSubscreen = 'sendMessage'" href="#">Send a message</a>
+            (click)="viewMailboxSubscreen = 'sendMessage'">Send a message</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [ngClass]="{'active': viewMailboxSubscreen === 'addKey'}"
-            (click)="viewMailboxSubscreen = 'addKey'" href="#">Add public key</a>
+            (click)="viewMailboxSubscreen = 'addKey'">Add public key</a>
         </li>
       </ul>
 
@@ -178,20 +178,27 @@
               <span *ngIf="showMessagesLoader" class="spinner-border spinner-border-sm"
                 role="status" aria-hidden="true"></span>
               Fetch All</button>
-            <button class="btn btn-danger" type="button"
-              (click)="deleteMessages(activeMailbox)">Delete All</button>
+            <button class="btn btn-danger" type="button" [disabled]=""
+              (click)="deleteMessages(activeMailbox)">Delete</button>
           </div>
 
-          <table class="table">
+          <table class="table" *ngIf="!showMessagesLoader">
             <thead>
               <tr>
+                <th>
+                  <input class="form-check-input" type="checkbox" (change)="checkAll($event)">
+                </th>
                 <th>From</th>
                 <th>Message</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let message of activeMailbox.messages">
+                <td>
+                  <div class="form-check">
+                    <input class="form-check-input" [(ngModel)]="message.isSelected" type="checkbox">
+                  </div>
+                </td>
                 <td>{{ message.fromTag || message.from }}</td>
                 <td>
                   <textarea readonly class="form-control">{{ message.msg || message.data }}</textarea>
@@ -199,11 +206,6 @@
                     <small class="text-muted">Nonce: {{ message.nonce }}</small>
                     <small class="text-muted">Time: {{ message.time * 1000 | date:'short' }}</small>
                   </div>
-                </td>
-                <td>
-                  <button class="btn btn-outline-danger" (click)="deleteMessages(activeMailbox, [message.nonce])">
-                    <i class="glyphicon glyphicon-remove"></i> Delete
-                  </button>
                 </td>
               </tr>
             </tbody>
