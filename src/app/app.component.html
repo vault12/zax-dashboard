@@ -56,8 +56,8 @@
             [ngClass]="{'active': mailbox === activeMailbox}">
             {{ mailbox.identity }}
             <span class="badge rounded-pill"
-              [ngClass]="{'bg-success': mailbox.messageCount > 0, 'bg-secondary': mailbox.messageCount === 0}">
-              {{ mailbox.messageCount }}</span>
+              [ngClass]="{'bg-success': mailbox.counter > 0, 'bg-secondary': mailbox.counter === 0}">
+              {{ mailbox.counter }}</span>
           </li>
         </ul>
       </div>
@@ -141,14 +141,14 @@
           <label for="secretKey" class="col-sm-3 col-form-label">Secret Key</label>
           <div class="col-sm-9">
             <input type="text" readonly class="form-control-plaintext" id="secretKey"
-              value="{{ activeMailbox.keyRing.commKey.strSecKey() }}">
+              value="{{ activeMailbox.keyRing.getPrivateCommKey() }}">
           </div>
         </div>
         <div class="row">
           <label for="publicKey" class="col-sm-3 col-form-label">Public Key</label>
           <div class="col-sm-9">
             <input type="text" readonly class="form-control-plaintext" id="publicKey"
-              value="{{ activeMailbox.keyRing.commKey.strPubKey() }}">
+              value="{{ activeMailbox.keyRing.getPubCommKey() }}">
           </div>
         </div>
       </form>
@@ -169,10 +169,10 @@
       </ul>
 
       <div class="row" *ngIf="viewMailboxSubscreen === 'inbox'">
-        <div class="col" *ngIf="activeMailbox.messageCount === 0">
+        <div class="col" *ngIf="activeMailbox.counter === 0">
           <h2 class="text-center mt-5 text-muted">No messages</h2>
         </div>
-        <div class="col" *ngIf="activeMailbox.messageCount > 0">
+        <div class="col" *ngIf="activeMailbox.counter > 0">
           <div class="d-flex align-items-center justify-content-between my-4">
             <button class="btn btn-success" type="button" (click)="getMessages(activeMailbox)">
               <span *ngIf="showMessagesLoader" class="spinner-border spinner-border-sm"
@@ -199,7 +199,7 @@
                     <input class="form-check-input" [(ngModel)]="message.isSelected" type="checkbox">
                   </div>
                 </td>
-                <td>{{ message.fromTag || message.from }}</td>
+                <td>{{ message.senderTag || message.from }}</td>
                 <td>
                   <textarea readonly class="form-control">{{ message.msg || message.data }}</textarea>
                   <div class="d-flex align-items-center justify-content-between">

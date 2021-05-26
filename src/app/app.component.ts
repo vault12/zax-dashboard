@@ -1,6 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { NgForm } from '@angular/forms';
+
+import { Mailbox, NaCl } from '@vault12/glow.ts';
+
+interface MailboxView extends Mailbox {
+  counter?: number;
+  messages?: any[];
+  recipients?: string[];
+}
 
 @Component({
   selector: 'app-root',
@@ -10,12 +17,8 @@ import { NgForm } from '@angular/forms';
 export class AppComponent implements OnInit {
   private mailboxPrefix = '_mailbox';
 
-  // Glow instances and mailboxes
-  private glow;
-  private relay;
-  private mailbox;
   activeMailbox = null;
-  mailboxes = [];
+  mailboxes: MailboxView[] = [];
 
   // UI flags
   showRefreshLoader = false;
@@ -31,39 +34,18 @@ export class AppComponent implements OnInit {
   viewMailboxSubscreen = 'inbox';
   quantity = 5;
 
-  constructor(private http: HttpClient) {
-    this.initGlow();
-
+  constructor() {
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    NaCl.setInstance();
     this.setDefaultRelay();
-    this.initRelay(this.relayURL);
     this.initMailboxes();
   }
 
   // -------------------------
   // Initialization
   // -------------------------
-
-  private initGlow() {
-    this.glow = (window as any).glow;
-    this.glow.CryptoStorage.startStorageSystem(new this.glow.SimpleStorageDriver());
-
-    this.mailbox = this.glow.MailBox;
-
-    this.glow.setAjaxImpl((url: string, data: string) => {
-      const request = this.http.post(url, data, {
-        headers: {
-          'Accept': 'text/plain',
-          'Content-Type': 'text/plain'
-        },
-        responseType: 'text'
-      });
-
-      return request.toPromise();
-    });
-  }
 
   private setDefaultRelay() {
     if (window.location.origin.indexOf('github.io') > -1) {
@@ -75,10 +57,6 @@ export class AppComponent implements OnInit {
       this.relayURL = 'https://z2.vault12.com'; //window.location.origin;
     }
     this.editingURL = this.relayURL;
-  }
-
-  private initRelay(url: string) {
-    this.relay = new this.glow.Relay(url);
   }
 
   async initMailboxes() {
@@ -106,7 +84,6 @@ export class AppComponent implements OnInit {
   updateRelay() {
     this.relayURL = this.editingURL;
     this.isEditing = false;
-    this.initRelay(this.relayURL);
     // reload messages count from a new server
     this.refreshCounter();
   }
@@ -143,44 +120,40 @@ export class AppComponent implements OnInit {
   }
 
   private async generateMailbox(name: string, options?) {
-    let mbx = null;
+    let mbx: MailboxView = null;
     if (!options) {
-      mbx = await this.mailbox.new(name);
+      mbx = await Mailbox.new(name);
     } else if (options.secret) {
-      mbx = await this.mailbox.fromSecKey(options.secret.fromBase64(), name);
+      mbx = await Mailbox.fromSecKey(name, options.secret.fromBase64());
     } else if (options.seed) {
-      mbx = await this.mailbox.fromSeed(options.seed, name);
+      mbx = await Mailbox.fromSeed(name, options.seed.toUint8Array());
     } else {
       console.error('Error: incorrect options');
     }
 
     // share keys among mailboxes
     for (const m of this.mailboxes) {
-      await mbx.keyRing.addGuest(m.identity, m.getPubCommKey());
-      await m.keyRing.addGuest(mbx.identity, mbx.getPubCommKey());
+      await mbx.keyRing.addGuest(m.identity, m.keyRing.getPubCommKey());
+      await m.keyRing.addGuest(mbx.identity, mbx.keyRing.getPubCommKey());
     }
+
+    mbx.counter = 0;
 
     this.mailboxes.push(mbx);
     return mbx;
   }
 
-  selectMailbox(mailbox) {
+  selectMailbox(mailbox: MailboxView) {
     this.activeMailbox = mailbox;
-    this.activeMailbox.recipients = Object.keys(mailbox.keyRing.guestKeys);
+    this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
     this.getMessages(mailbox);
   }
 
-  async deleteMailbox(mailbox) {
-    await this.destroyMailbox(mailbox);
+  async deleteMailbox(mailbox: Mailbox) {
+    this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
+    await mailbox.selfDestruct();
     localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
     this.activeMailbox = null;
-  }
-
-  async destroyMailbox(mailbox) {
-    const mbx = this.mailboxes.find(m => mailbox.keyRing.storage.root === m.keyRing.storage.root);
-    console.log(`Deleting mailbox ${mbx.identity}`);
-    await mbx.selfDestruct(true);
-    this.mailboxes = this.mailboxes.filter(m => mbx.keyRing.storage.root !== m.keyRing.storage.root);
   }
 
   async addMailboxes(amount: number = 5) {
@@ -206,9 +179,9 @@ export class AppComponent implements OnInit {
   // Glow operations
   // -------------------------
 
-  addPublicKey(mailbox, form: NgForm) {
+  async addPublicKey(mailbox: Mailbox, form: NgForm) {
     const { name, key } = form.controls;
-    if (mailbox.keyRing.addGuest(name.value, key.value)) {
+    if (await mailbox.keyRing.addGuest(name.value, key.value)) {
       this.keyAdded = true;
       setTimeout(() => {
         this.keyAdded = false;
@@ -223,7 +196,8 @@ export class AppComponent implements OnInit {
     }
     this.showRefreshLoader = true;
     for (const mbx of this.mailboxes) {
-      await this.messageCount(mbx);
+      await mbx.connectToRelay(this.relayURL);
+      mbx.counter = await mbx.count(this.relayURL);
     }
     this.showRefreshLoader = false;
   }
@@ -232,28 +206,25 @@ export class AppComponent implements OnInit {
     this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
   }
 
-  async messageCount(mailbox) {
-    await mailbox.connectToRelay(this.relay);
-    const count = await mailbox.relayCount(this.relay);
-    mailbox.messageCount = count;
-  }
-
-  async getMessages(mailbox) {
+  async getMessages(mailboxView: MailboxView) {
     this.showMessagesLoader = true;
-    const messages = await mailbox.getRelayMessages(this.relay);
-    mailbox.messages = [];
+    await mailboxView.connectToRelay(this.relayURL);
+    const messages = await mailboxView.download(this.relayURL);
+    mailboxView.messages = [];
     for (const msg of messages) {
-      if (msg.kind === 'file') {
+      // TOOO: support ZaxMessageKind.file
+      /* if (msg.kind === 'file') {
         msg.data = '📎 File [uploadID: ' + JSON.parse(msg.data).uploadID + ']';
-      }
-      mailbox.messages.push(msg);
+      }*/
+      mailboxView.messages.push(msg);
     }
     this.showMessagesLoader = false;
   }
 
-  async sendMessage(mailbox, form: NgForm) {
+  async sendMessage(mailbox: Mailbox, form: NgForm) {
     const { recipient, message } = form.controls;
-    await mailbox.sendToVia(recipient.value, this.relay, message.value);
+    await mailbox.connectToRelay(this.relayURL);
+    await mailbox.upload(this.relayURL, recipient.value, message.value);
     this.messageSent = true;
     setTimeout(() => {
       this.messageSent = false;
@@ -262,15 +233,15 @@ export class AppComponent implements OnInit {
     this.refreshCounter();
   }
 
-  async deleteMessages(mailbox) {
+  async deleteMessages(mailbox: MailboxView) {
     const noncesToDelete = mailbox.messages.filter(message => message.isSelected)
       .map(message => message.nonce);
-    await mailbox.connectToRelay(this.relay);
-    await mailbox.relayDelete(noncesToDelete, this.relay);
+    await mailbox.connectToRelay(this.relayURL);
+    await mailbox.delete(this.relayURL, noncesToDelete);
 
     mailbox.messages = mailbox.messages.filter(message => !message.isSelected);
 
     // Update counter without polling server
-    mailbox.messageCount = Object.keys(mailbox.messages).length;
+    mailbox.counter = Object.keys(mailbox.messages).length;
   }
 }
