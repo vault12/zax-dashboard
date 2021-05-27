@@ -17,7 +17,7 @@ interface MailboxView extends Mailbox {
 export class AppComponent implements OnInit {
   private mailboxPrefix = '_mailbox';
 
-  activeMailbox = null;
+  activeMailbox?: MailboxView = null;
   mailboxes: MailboxView[] = [];
 
   // UI flags
@@ -34,13 +34,10 @@ export class AppComponent implements OnInit {
   viewMailboxSubscreen = 'inbox';
   quantity = 5;
 
-  constructor() {
-  }
-
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
     NaCl.setInstance();
     this.setDefaultRelay();
-    this.initMailboxes();
+    await this.initMailboxes();
   }
 
   // -------------------------
@@ -59,33 +56,28 @@ export class AppComponent implements OnInit {
     this.editingURL = this.relayURL;
   }
 
-  async initMailboxes() {
+  async initMailboxes(): Promise<void> {
     // add all mailboxes stored in localStorage
-    var mbx_count = 0
-    var localKeys = Object.keys(localStorage)
+    const localKeys = Object.keys(localStorage).filter(key => key.startsWith(this.mailboxPrefix));
     for (const key of localKeys) {
-      if (key.indexOf(this.mailboxPrefix) === 0) {
-        mbx_count++
-        await this.generateMailbox(localStorage.getItem(key));
-      }
+      await this.generateMailbox(localStorage.getItem(key));
     }
-    if (mbx_count == 0)
-    {
-      await this.addMailbox('Alice',null, true)
-      await this.addMailbox('Bob',  null, true)
+    if (!localKeys.length) {
+      await this.addMailbox('Alice');
+      await this.addMailbox('Bob');
     }
-    this.refreshCounter();
+    await this.refreshCounter();
   }
 
   // -------------------------
   // Relays
   // -------------------------
 
-  updateRelay() {
+  async updateRelay(): Promise<void> {
     this.relayURL = this.editingURL;
     this.isEditing = false;
     // reload messages count from a new server
-    this.refreshCounter();
+    await this.refreshCounter();
   }
 
   // -------------------------
@@ -108,15 +100,13 @@ export class AppComponent implements OnInit {
         throw new Error('Mailbox: unknown constructor type');
     }
 
+    await this.refreshCounter();
     form.reset();
   }
 
-  private async addMailbox(name: string, options?, noRefresh?: boolean) {
+  private async addMailbox(name: string, options?) {
     const mbx = await this.generateMailbox(name, options);
     localStorage.setItem(`${this.mailboxPrefix}.${name}`, mbx.identity);
-    if (!noRefresh) {
-      this.refreshCounter();
-    }
   }
 
   private async generateMailbox(name: string, options?) {
@@ -170,9 +160,9 @@ export class AppComponent implements OnInit {
       if (i > 1) {
         name = `${name} ${i}`;
       }
-      this.addMailbox(name, null, true);
+      await this.addMailbox(name);
     }
-    this.refreshCounter();
+    await this.refreshCounter();
   }
 
   // -------------------------
@@ -202,7 +192,7 @@ export class AppComponent implements OnInit {
     this.showRefreshLoader = false;
   }
 
-  checkAll(event: { target: HTMLInputElement }) {
+  checkAll(event: { target: HTMLInputElement }): void {
     this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
   }
 
@@ -230,7 +220,7 @@ export class AppComponent implements OnInit {
       this.messageSent = false;
     }, 3000);
     form.reset();
-    this.refreshCounter();
+    await this.refreshCounter();
   }
 
   async deleteMessages(mailbox: MailboxView) {
