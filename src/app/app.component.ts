@@ -124,9 +124,9 @@ export class AppComponent implements OnInit {
     if (!options) {
       mbx = await Mailbox.new(name);
     } else if (options.secret) {
-      mbx = await Mailbox.fromSecKey(name, options.secret.fromBase64());
+      mbx = await Mailbox.fromSecKey(name, options.secret);
     } else if (options.seed) {
-      mbx = await Mailbox.fromSeed(name, options.seed.toUint8Array());
+      mbx = await Mailbox.fromSeed(name, options.seed);
     } else {
       console.error('Error: incorrect options');
     }
