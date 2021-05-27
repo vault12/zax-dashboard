@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
-import { Mailbox, NaCl } from '@vault12/glow.ts';
+import { Mailbox, NaCl, ZaxParsedMessage } from '@vault12/glow.ts';
+
+type MessageView = ZaxParsedMessage & { isSelected?: boolean };
 
 interface MailboxView extends Mailbox {
   counter?: number;
-  messages?: any[];
+  messages?: MessageView[];
   recipients?: string[];
 }
 
@@ -84,7 +86,7 @@ export class AppComponent implements OnInit {
   // Mailboxes
   // -------------------------
 
-  async createMailbox(form: NgForm, type: string) {
+  async createMailbox(form: NgForm, type: string): Promise<void> {
     const { name, seed, secret } = form.controls;
     switch (type) {
       case 'new':
@@ -133,20 +135,20 @@ export class AppComponent implements OnInit {
     return mbx;
   }
 
-  selectMailbox(mailbox: MailboxView) {
+  async selectMailbox(mailbox: MailboxView): Promise<void> {
     this.activeMailbox = mailbox;
     this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
-    this.getMessages(mailbox);
+    await this.getMessages(mailbox);
   }
 
-  async deleteMailbox(mailbox: Mailbox) {
+  async deleteMailbox(mailbox: Mailbox): Promise<void> {
     this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
     await mailbox.selfDestruct();
     localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
     this.activeMailbox = null;
   }
 
-  async addMailboxes(amount: number = 5) {
+  async addMailboxes(amount = 5): Promise<void> {
     // sort names randomly
     const firstNames = ['Alice', 'Bob', 'Charlie', 'Chuck', 'Dave', 'Erin',
       'Eve', 'Faith', 'Frank', 'Mallory', 'Oscar', 'Peggy', 'Pat', 'Sam',
@@ -169,7 +171,7 @@ export class AppComponent implements OnInit {
   // Glow operations
   // -------------------------
 
-  async addPublicKey(mailbox: Mailbox, form: NgForm) {
+  async addPublicKey(mailbox: Mailbox, form: NgForm): Promise<void> {
     const { name, key } = form.controls;
     if (await mailbox.keyRing.addGuest(name.value, key.value)) {
       this.keyAdded = true;
@@ -180,7 +182,7 @@ export class AppComponent implements OnInit {
     form.reset();
   }
 
-  async refreshCounter() {
+  async refreshCounter(): Promise<void> {
     if (!this.mailboxes.length) {
       return;
     }
@@ -196,7 +198,7 @@ export class AppComponent implements OnInit {
     this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
   }
 
-  async getMessages(mailboxView: MailboxView) {
+  async getMessages(mailboxView: MailboxView): Promise<void> {
     this.showMessagesLoader = true;
     await mailboxView.connectToRelay(this.relayURL);
     const messages = await mailboxView.download(this.relayURL);
@@ -211,7 +213,7 @@ export class AppComponent implements OnInit {
     this.showMessagesLoader = false;
   }
 
-  async sendMessage(mailbox: Mailbox, form: NgForm) {
+  async sendMessage(mailbox: Mailbox, form: NgForm): Promise<void> {
     const { recipient, message } = form.controls;
     await mailbox.connectToRelay(this.relayURL);
     await mailbox.upload(this.relayURL, recipient.value, message.value);
@@ -223,7 +225,7 @@ export class AppComponent implements OnInit {
     await this.refreshCounter();
   }
 
-  async deleteMessages(mailbox: MailboxView) {
+  async deleteMessages(mailbox: MailboxView): Promise<void> {
     const noncesToDelete = mailbox.messages.filter(message => message.isSelected)
       .map(message => message.nonce);
     await mailbox.connectToRelay(this.relayURL);
