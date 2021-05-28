@@ -95,7 +95,9 @@
         <div class="mt-4" *ngIf="newMailboxSubscreen !== 'multiple'">
           <form class="d-grid gap-3 needs-validation" #newMailboxForm="ngForm" novalidate
             [class.was-validated]="newMailboxForm.submitted && newMailboxForm.touched"
-            (submit)="createMailbox(newMailboxForm, newMailboxSubscreen)">
+            (submit)="createMailbox(newMailboxForm.form.controls.name?.value,
+              newMailboxForm.form.controls.seed?.value,
+              newMailboxForm.form.controls.secret?.value); newMailboxForm.reset()">
             <div class="input-group has-validation">
               <input type="text" class="form-control" name="name" ngModel placeholder="Mailbox name" required>
               <div class="invalid-feedback">Sorry, the mailbox name can't be empty</div>

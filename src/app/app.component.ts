@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
-
 import { Mailbox, NaCl, ZaxParsedMessage } from '@vault12/glow.ts';
 
 type MessageView = ZaxParsedMessage & { isSelected?: boolean };
@@ -85,41 +83,31 @@ export class AppComponent implements OnInit {
   // Mailboxes
   // -------------------------
 
-  async createMailbox(form: NgForm, type: string): Promise<void> {
-    const { name, seed, secret } = form.controls;
-    switch (type) {
-      case 'new':
-        await this.addMailbox(name.value);
-        break;
-      case 'secret':
-        await this.addMailbox(name.value, { secret: secret.value });
-        break;
-      case 'seed':
-        await this.addMailbox(name.value, { seed: seed.value });
-        break;
-      default:
-        throw new Error('Mailbox: unknown constructor type');
+  async createMailbox(name: string, seed?: string, secret?: string): Promise<void> {
+    if (seed) {
+      await this.addMailbox(name, { seed });
+    } else if (secret) {
+      await this.addMailbox(name, { secret });
+    } else {
+      await this.addMailbox(name);
     }
 
     await this.refreshCounter();
-    form.reset();
   }
 
-  private async addMailbox(name: string, options?) {
+  private async addMailbox(name: string, options?: { seed?: string, secret?: string }) {
     const mbx = await this.generateMailbox(name, options);
     localStorage.setItem(`${this.mailboxPrefix}.${name}`, mbx.identity);
   }
 
-  private async generateMailbox(name: string, options?) {
+  private async generateMailbox(name: string, options?: { seed?: string, secret?: string }) {
     let mbx: MailboxView = null;
-    if (!options) {
-      mbx = await Mailbox.new(name);
-    } else if (options.secret) {
-      mbx = await Mailbox.fromSecKey(name, options.secret);
-    } else if (options.seed) {
+    if (options?.seed) {
       mbx = await Mailbox.fromSeed(name, options.seed);
+    } else if (options?.secret) {
+      mbx = await Mailbox.fromSecKey(name, options.secret);
     } else {
-      console.error('Error: incorrect options');
+      mbx = await Mailbox.new(name);
     }
 
     // share keys among mailboxes
@@ -142,6 +130,9 @@ export class AppComponent implements OnInit {
 
   async deleteMailbox(mailbox: Mailbox): Promise<void> {
     this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
+    for (const mbx of this.mailboxes) {
+      await mbx.keyRing.removeGuest(mailbox.identity);
+    }
     await mailbox.selfDestruct();
     localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
     this.activeMailbox = null;
