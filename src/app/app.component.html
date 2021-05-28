@@ -116,15 +116,15 @@
 
         <div class="mt-4" *ngIf="newMailboxSubscreen === 'multiple'">
           <div class="d-grid gap-4">
-            <select class="form-select" [(ngModel)]="quantity">
+            <select class="form-select" #quantity>
               <option value="2">2</option>
               <option value="3">3</option>
               <option value="4">4</option>
-              <option value="5">5</option>
+              <option value="5" selected>5</option>
               <option value="10">10</option>
             </select>
-            <button class="btn btn-success" type="button" (click)="addMailboxes(quantity)">Add Multiple
-              Mailboxes</button>
+            <button class="btn btn-success" type="button" (click)="addMailboxes(quantity.value)">
+              Add Multiple Mailboxes</button>
           </div>
         </div>
       </div>
@@ -218,12 +218,13 @@
           <span class="badge bg-success" [ngClass]="{'badge-show': messageSent}">Message sent!</span>
           <form class="d-grid gap-2 needs-validation" #messageForm="ngForm" novalidate
             [class.was-validated]="messageForm.submitted && messageForm.touched"
-            (submit)="sendMessage(activeMailbox, messageForm)">
-            <select type="text" name="recipient" ngModel class="form-select" required>
+            (submit)="sendMessage(activeMailbox, recipient.value, message.value); messageForm.reset()">
+            <select type="text" name="recipient" #recipient ngModel class="form-select" required>
               <option value="" disabled selected>Recipient</option>
               <option *ngFor="let guest of activeMailbox.recipients" value="{{ guest }}">{{ guest }}</option>
             </select>
-            <textarea ngModel name="message" placeholder="Message" rows="3" required class="form-control"></textarea>
+            <textarea ngModel name="message" #message placeholder="Message"
+              rows="3" required class="form-control"></textarea>
             <button class="btn btn-success" type="submit" [disabled]="!messageForm.valid">Send</button>
           </form>
         </div>
@@ -234,9 +235,10 @@
           <span class="badge bg-success" [ngClass]="{'badge-show': keyAdded}">Key added!</span>
           <form class="d-grid gap-2 needs-validation" #keyForm="ngForm" novalidate
             [class.was-validated]="keyForm.submitted && keyForm.touched"
-            (submit)="addPublicKey(activeMailbox, keyForm)">
-            <input type="text" ngModel name="name" placeholder="User Name" class="form-control" required>
-            <input type="text" ngModel name="key" placeholder="Public Key (Base64)" class="form-control" required>
+            (submit)="addPublicKey(activeMailbox, keyName.value, keyKey.value); keyForm.reset()">
+            <input type="text" ngModel name="name" #keyName placeholder="User Name" class="form-control" required>
+            <input type="text" ngModel name="key" #keyKey placeholder="Public Key (Base64)"
+              class="form-control" required>
             <button class="btn btn-success" type="submit" [disabled]="!keyForm.valid">Add</button>
           </form>
         </div>

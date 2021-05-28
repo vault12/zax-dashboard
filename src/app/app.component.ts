@@ -34,7 +34,6 @@ export class AppComponent implements OnInit {
   editingURL: string;
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
-  quantity = 5;
 
   async ngOnInit(): Promise<void> {
     NaCl.setInstance();
@@ -171,21 +170,16 @@ export class AppComponent implements OnInit {
   // Glow operations
   // -------------------------
 
-  async addPublicKey(mailbox: Mailbox, form: NgForm): Promise<void> {
-    const { name, key } = form.controls;
-    if (await mailbox.keyRing.addGuest(name.value, key.value)) {
+  async addPublicKey(mailbox: MailboxView, name: string, key: string): Promise<void> {
+    if (await mailbox.keyRing.addGuest(name, key)) {
       this.keyAdded = true;
       setTimeout(() => {
         this.keyAdded = false;
       }, 3000);
     }
-    form.reset();
   }
 
   async refreshCounter(): Promise<void> {
-    if (!this.mailboxes.length) {
-      return;
-    }
     this.showRefreshLoader = true;
     for (const mbx of this.mailboxes) {
       await mbx.connectToRelay(this.relayURL);
@@ -213,15 +207,13 @@ export class AppComponent implements OnInit {
     this.showMessagesLoader = false;
   }
 
-  async sendMessage(mailbox: Mailbox, form: NgForm): Promise<void> {
-    const { recipient, message } = form.controls;
+  async sendMessage(mailbox: MailboxView, guest: string, message: string): Promise<void> {
     await mailbox.connectToRelay(this.relayURL);
-    await mailbox.upload(this.relayURL, recipient.value, message.value);
+    await mailbox.upload(this.relayURL, guest, message);
     this.messageSent = true;
     setTimeout(() => {
       this.messageSent = false;
     }, 3000);
-    form.reset();
     await this.refreshCounter();
   }
 
