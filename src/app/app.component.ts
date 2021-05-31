@@ -15,15 +15,17 @@ interface MailboxView extends Mailbox {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  private mailboxPrefix = '_mailbox';
+  // Needed to find in local storage and load all previously generated mailboxes
+  private readonly mailboxPrefix = '_mailbox';
 
-  activeMailbox?: MailboxView = null;
   mailboxes: MailboxView[] = [];
+  activeMailbox: MailboxView = null;
 
   // UI flags
   showRefreshLoader = false;
   showMessagesLoader = false;
   messageSent = false;
+  mailboxCreated = false;
   keyAdded = false;
   isEditing = false;
 
@@ -55,7 +57,7 @@ export class AppComponent implements OnInit {
     this.editingURL = this.relayURL;
   }
 
-  async initMailboxes(): Promise<void> {
+  private async initMailboxes(): Promise<void> {
     // add all mailboxes stored in localStorage
     const localKeys = Object.keys(localStorage).filter(key => key.startsWith(this.mailboxPrefix));
     for (const key of localKeys) {
@@ -80,24 +82,76 @@ export class AppComponent implements OnInit {
   }
 
   // -------------------------
-  // Mailboxes
+  // Mailbox operations
   // -------------------------
 
+  /**
+   * Create a new mailbox based on user's input and fetch the number of messages in it
+   */
   async createMailbox(name: string, seed?: string, secret?: string): Promise<void> {
+    let mailboxName = null;
     if (seed) {
-      await this.addMailbox(name, { seed });
+      mailboxName = await this.addMailbox(name, { seed });
     } else if (secret) {
-      await this.addMailbox(name, { secret });
+      mailboxName = await this.addMailbox(name, { secret });
     } else {
-      await this.addMailbox(name);
+      mailboxName = await this.addMailbox(name);
     }
 
-    await this.refreshCounter();
+    this.mailboxCreated = true;
+    setTimeout(() => {
+      this.mailboxCreated = false;
+    }, 3000);
+    await this.refreshCounter([mailboxName]);
   }
 
-  private async addMailbox(name: string, options?: { seed?: string, secret?: string }) {
+  /**
+   * Delete the Mailbox from local storage, remove it on UI, and remove its keys
+   * from keyrings of other mailboxes
+   */
+   async deleteMailbox(mailbox: MailboxView): Promise<void> {
+    this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
+    for (const mbx of this.mailboxes) {
+      await mbx.keyRing.removeGuest(mailbox.identity);
+    }
+    await mailbox.selfDestruct();
+    localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
+    this.activeMailbox = null;
+  }
+
+  /**
+   * Display the Mailbox on UI
+   */
+  async selectMailbox(mailbox: MailboxView): Promise<void> {
+    this.activeMailbox = mailbox;
+    this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
+    await this.getMessages(mailbox);
+  }
+
+  /**
+   * Auto-generate the defined amount of random Mailboxes
+   */
+  async addMultipleMailboxes(amount = 5): Promise<void> {
+    // sort names randomly and pick `amount` of them
+    const firstNames = ['Alice', 'Bob', 'Charlie', 'Chuck', 'Dave', 'Erin',
+      'Eve', 'Faith', 'Frank', 'Mallory', 'Oscar', 'Peggy', 'Pat', 'Sam',
+      'Sally', 'Sybil', 'Trent', 'Trudy', 'Victor', 'Walter', 'Wendy']
+      .sort(() => .5 - Math.random()).slice(0, amount);
+
+    // create multiple mailboxes
+    const mailboxes = await Promise.all(
+      firstNames.map(async (name) => await this.addMailbox(this.ensureUniqueName(name)))
+    );
+
+    // fetch message count for these new mailboxes only
+    await this.refreshCounter(mailboxes);
+  }
+
+  private async addMailbox(name: string, options?: { seed?: string, secret?: string }): Promise<string> {
+    name = this.ensureUniqueName(name);
     const mbx = await this.generateMailbox(name, options);
     localStorage.setItem(`${this.mailboxPrefix}.${name}`, mbx.identity);
+    return name;
   }
 
   private async generateMailbox(name: string, options?: { seed?: string, secret?: string }) {
@@ -120,39 +174,11 @@ export class AppComponent implements OnInit {
     return mbx;
   }
 
-  async selectMailbox(mailbox: MailboxView): Promise<void> {
-    this.activeMailbox = mailbox;
-    this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
-    await this.getMessages(mailbox);
-  }
-
-  async deleteMailbox(mailbox: Mailbox): Promise<void> {
-    this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
-    for (const mbx of this.mailboxes) {
-      await mbx.keyRing.removeGuest(mailbox.identity);
-    }
-    await mailbox.selfDestruct();
-    localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
-    this.activeMailbox = null;
-  }
-
-  async addMailboxes(amount = 5): Promise<void> {
-    // sort names randomly
-    const firstNames = ['Alice', 'Bob', 'Charlie', 'Chuck', 'Dave', 'Erin',
-      'Eve', 'Faith', 'Frank', 'Mallory', 'Oscar', 'Peggy', 'Pat', 'Sam',
-      'Sally', 'Sybil', 'Trent', 'Trudy', 'Victor', 'Walter', 'Wendy']
-      .sort(() => .5 - Math.random()).slice(0, amount);
-
-    for (let name of firstNames) {
-      // check if name is on the list already
-      const i = this.mailboxes.filter(m => m.identity.indexOf(name) > -1).length + 1;
-      // add index if it's on the list
-      if (i > 1) {
-        name = `${name} ${i}`;
-      }
-      await this.addMailbox(name);
-    }
-    await this.refreshCounter();
+  private ensureUniqueName(name: string): string {
+    // check if name is on the list already
+    const i = this.mailboxes.filter(m => m.identity.indexOf(name) > -1).length + 1;
+    // add index if it's on the list
+    return (i > 1) ? `${name} ${i}` : name;
   }
 
   // -------------------------
@@ -168,9 +194,12 @@ export class AppComponent implements OnInit {
     }
   }
 
-  async refreshCounter(): Promise<void> {
+  async refreshCounter(names?: string[]): Promise<void> {
     this.showRefreshLoader = true;
-    for (const mbx of this.mailboxes) {
+    // take either chosen names, or all mailboxes
+    const mailboxes = names ?
+      this.mailboxes.filter(mailbox => names.includes(mailbox.identity)) : this.mailboxes;
+    for (const mbx of mailboxes) {
       await mbx.connectToRelay(this.relayURL);
       mbx.counter = await mbx.count(this.relayURL);
     }

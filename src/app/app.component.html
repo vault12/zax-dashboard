@@ -92,7 +92,8 @@
           </li>
         </ul>
 
-        <div class="mt-4" *ngIf="newMailboxSubscreen !== 'multiple'">
+        <div *ngIf="newMailboxSubscreen !== 'multiple'">
+          <span class="badge bg-success" [class.badge-show]="mailboxCreated">Mailbox created!</span>
           <form class="d-grid gap-3 needs-validation" #newMailboxForm="ngForm" novalidate
             [class.was-validated]="newMailboxForm.submitted && newMailboxForm.touched"
             (submit)="createMailbox(newMailboxForm.form.controls.name?.value,
@@ -125,7 +126,7 @@
               <option value="5" selected>5</option>
               <option value="10">10</option>
             </select>
-            <button class="btn btn-success" type="button" (click)="addMailboxes(quantity.value)">
+            <button class="btn btn-success" type="button" (click)="addMultipleMailboxes(quantity.value)">
               Add Multiple Mailboxes</button>
           </div>
         </div>
