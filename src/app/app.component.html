@@ -11,7 +11,7 @@
         <div class="flex-fill" *ngIf="!isEditing">
           <label for="relayURL" class="visually-hidden">Relay URL</label>
           <input type="text" readonly class="form-control ml-sm-4 mr-sm-2" name="relayURL" placeholder="Relay URL"
-            id="relayURL" [(ngModel)]="relayURL">
+            id="relayURL" [value]="relayURL">
         </div>
         <div class="flex-fill" *ngIf="isEditing">
           <label for="relayURL2" class="visually-hidden">Relay URL</label>
@@ -180,7 +180,7 @@
               <span *ngIf="showMessagesLoader" class="spinner-border spinner-border-sm"
                 role="status" aria-hidden="true"></span>
               Fetch All</button>
-            <button class="btn btn-danger" type="button" [disabled]=""
+            <button class="btn btn-danger" type="button" [disabled]="!hasSelectedMessages()"
               (click)="deleteMessages(activeMailbox)">Delete</button>
           </div>
 

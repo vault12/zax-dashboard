@@ -116,8 +116,6 @@ export class AppComponent implements OnInit {
       await m.keyRing.addGuest(mbx.identity, mbx.keyRing.getPubCommKey());
     }
 
-    mbx.counter = 0;
-
     this.mailboxes.push(mbx);
     return mbx;
   }
@@ -181,6 +179,10 @@ export class AppComponent implements OnInit {
 
   checkAll(event: { target: HTMLInputElement }): void {
     this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
+  }
+
+  hasSelectedMessages(): boolean {
+    return !!this.activeMailbox?.messages?.find(message => message.isSelected);
   }
 
   async getMessages(mailboxView: MailboxView): Promise<void> {
