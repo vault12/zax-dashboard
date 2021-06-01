@@ -9,6 +9,12 @@ interface MailboxView extends Mailbox {
   recipients?: string[];
 }
 
+enum UIAction {
+  keyAdded,
+  mailboxCreated,
+  messageSent
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -24,10 +30,14 @@ export class AppComponent implements OnInit {
   // UI flags
   showRefreshLoader = false;
   showMessagesLoader = false;
-  messageSent = false;
-  mailboxCreated = false;
-  keyAdded = false;
   isEditing = false;
+
+  UIAction = UIAction;
+  UIFlags = {
+    [UIAction.keyAdded]: false,
+    [UIAction.mailboxCreated]: false,
+    [UIAction.messageSent]: false
+  };
 
   // UI defaults
   relayURL: string;
@@ -98,10 +108,7 @@ export class AppComponent implements OnInit {
       mailboxName = await this.addMailbox(name);
     }
 
-    this.mailboxCreated = true;
-    setTimeout(() => {
-      this.mailboxCreated = false;
-    }, 3000);
+    this.showBadge(UIAction.mailboxCreated);
     await this.refreshCounter([mailboxName]);
   }
 
@@ -186,12 +193,9 @@ export class AppComponent implements OnInit {
   // -------------------------
 
   async addPublicKey(mailbox: MailboxView, name: string, key: string): Promise<void> {
-    if (await mailbox.keyRing.addGuest(name, key)) {
-      this.keyAdded = true;
-      setTimeout(() => {
-        this.keyAdded = false;
-      }, 3000);
-    }
+    await mailbox.keyRing.addGuest(name, key);
+    this.showBadge(UIAction.keyAdded);
+    await this.selectMailbox(mailbox);
   }
 
   async refreshCounter(names?: string[]): Promise<void> {
@@ -204,14 +208,6 @@ export class AppComponent implements OnInit {
       mbx.counter = await mbx.count(this.relayURL);
     }
     this.showRefreshLoader = false;
-  }
-
-  checkAll(event: { target: HTMLInputElement }): void {
-    this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
-  }
-
-  hasSelectedMessages(): boolean {
-    return !!this.activeMailbox?.messages?.find(message => message.isSelected);
   }
 
   async getMessages(mailboxView: MailboxView): Promise<void> {
@@ -232,10 +228,7 @@ export class AppComponent implements OnInit {
   async sendMessage(mailbox: MailboxView, guest: string, message: string): Promise<void> {
     await mailbox.connectToRelay(this.relayURL);
     await mailbox.upload(this.relayURL, guest, message);
-    this.messageSent = true;
-    setTimeout(() => {
-      this.messageSent = false;
-    }, 3000);
+    this.showBadge(UIAction.messageSent);
     await this.refreshCounter();
   }
 
@@ -249,5 +242,24 @@ export class AppComponent implements OnInit {
 
     // Update counter without polling server
     mailbox.counter = Object.keys(mailbox.messages).length;
+  }
+
+  // -------------------------
+  // UI helpers
+  // -------------------------
+
+  selectAllMessages(target: HTMLInputElement): void {
+    this.activeMailbox.messages.map(message => message.isSelected = target.checked);
+  }
+
+  hasSelectedMessages(): boolean {
+    return !!this.activeMailbox.messages?.find(message => message.isSelected);
+  }
+
+  private showBadge(action: UIAction) {
+    this.UIFlags[action] = true;
+    setTimeout(() => {
+      this.UIFlags[action] = false;
+    }, 3000);
   }
 }
