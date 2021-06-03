@@ -166,6 +166,10 @@
             (click)="viewMailboxSubscreen = 'sendMessage'">Send a message</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" [class.active]="viewMailboxSubscreen === 'sendFile'"
+            (click)="viewMailboxSubscreen = 'sendFile'">Send a file</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" [class.active]="viewMailboxSubscreen === 'addKey'"
             (click)="viewMailboxSubscreen = 'addKey'">Add public key</a>
         </li>
@@ -204,7 +208,13 @@
                 </td>
                 <td>{{ message.senderTag || message.from }}</td>
                 <td>
-                  <textarea readonly class="form-control">{{ message.msg || message.data }}</textarea>
+                  <textarea *ngIf="message.kind !== ZaxMessageKind.file" readonly
+                    class="form-control">{{ message.data }}</textarea>
+                  <div *ngIf="message.kind === ZaxMessageKind.file">
+                    {{ message.data.name }} ({{ message.data.orig_size }} bytes)
+                    <button type="button" class="btn btn-outline-success" (click)="downloadFile(message)">
+                      Download</button>
+                  </div>
                   <div class="d-flex align-items-center justify-content-between">
                     <small class="text-muted">Nonce: {{ message.nonce }}</small>
                     <small class="text-muted">Time: {{ message.time * 1000 | date:'short' }}</small>
@@ -229,6 +239,23 @@
             <textarea ngModel name="message" #message placeholder="Message"
               rows="3" required class="form-control"></textarea>
             <button class="btn btn-success" type="submit" [disabled]="!messageForm.valid">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="row" *ngIf="viewMailboxSubscreen === 'sendFile'">
+        <div class="col-sm-6">
+          <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.fileSent]">File sent!</span>
+          <form class="d-grid gap-2 needs-validation" #fileForm="ngForm" novalidate
+            [class.was-validated]="fileForm.submitted && fileForm.touched"
+            (submit)="sendFile(activeMailbox, fileRecipient.value); fileForm.reset()">
+            <select type="text" name="fileRecipient" #fileRecipient ngModel class="form-select" required>
+              <option value="" disabled selected>Recipient</option>
+              <option *ngFor="let guest of activeMailbox.recipients" value="{{ guest }}">{{ guest }}</option>
+            </select>
+            <input type="file" name="file" #file ngModel class="form-control" required
+              (change)="selectedFile = $event.target.files.item(0)">
+            <button class="btn btn-success" type="submit" [disabled]="!fileForm.valid">Send</button>
           </form>
         </div>
       </div>

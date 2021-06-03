@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Mailbox, NaCl, ZaxParsedMessage } from '@vault12/glow.ts';
+import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage } from '@vault12/glow.ts';
 
 type MessageView = ZaxParsedMessage & { isSelected?: boolean };
 
@@ -12,7 +12,8 @@ interface MailboxView extends Mailbox {
 enum UIAction {
   keyAdded,
   mailboxCreated,
-  messageSent
+  messageSent,
+  fileSent
 }
 
 @Component({
@@ -26,17 +27,21 @@ export class AppComponent implements OnInit {
 
   mailboxes: MailboxView[] = [];
   activeMailbox: MailboxView = null;
+  selectedFile: File;
 
   // UI flags
   showRefreshLoader = false;
   showMessagesLoader = false;
   isEditing = false;
 
+  ZaxMessageKind = ZaxMessageKind;
+
   UIAction = UIAction;
   UIFlags = {
     [UIAction.keyAdded]: false,
     [UIAction.mailboxCreated]: false,
-    [UIAction.messageSent]: false
+    [UIAction.messageSent]: false,
+    [UIAction.fileSent]: false
   };
 
   // UI defaults
@@ -126,6 +131,44 @@ export class AppComponent implements OnInit {
     this.activeMailbox = null;
   }
 
+  async sendFile(mailbox: MailboxView, guest: string): Promise<void> {
+    if (!this.selectedFile) {
+      return;
+    }
+
+    const binary = new Uint8Array(await this.selectedFile.arrayBuffer());
+    const metadata = {
+      name: this.selectedFile.name,
+      orig_size: this.selectedFile.size,
+      modified: this.selectedFile.lastModified
+    };
+
+    await mailbox.connectToRelay(this.relayURL);
+    const { skey, uploadID, max_chunk_size } =
+      await mailbox.startFileUpload(this.relayURL, guest, metadata);
+
+    if (this.selectedFile.size >= max_chunk_size) {
+      alert('Error, file size is too big');
+      return;
+    }
+
+    await mailbox.uploadFileChunk(this.relayURL, uploadID, binary, 0, 1, skey);
+    this.showBadge(UIAction.fileSent);
+    await this.refreshCounter();
+  }
+
+  async downloadFile(message: ZaxFileMessage): Promise<void> {
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL, message.uploadID, 0, message.data.skey);
+
+    const url = window.URL.createObjectURL(new Blob([chunk]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', message.data.name);
+    document.body.appendChild(link);
+    link.click();
+  }
+
   /**
    * Display the Mailbox on UI
    */
@@ -213,15 +256,7 @@ export class AppComponent implements OnInit {
   async getMessages(mailboxView: MailboxView): Promise<void> {
     this.showMessagesLoader = true;
     await mailboxView.connectToRelay(this.relayURL);
-    const messages = await mailboxView.download(this.relayURL);
-    mailboxView.messages = [];
-    for (const msg of messages) {
-      // TOOO: support ZaxMessageKind.file
-      /* if (msg.kind === 'file') {
-        msg.data = '📎 File [uploadID: ' + JSON.parse(msg.data).uploadID + ']';
-      }*/
-      mailboxView.messages.push(msg);
-    }
+    mailboxView.messages = await mailboxView.download(this.relayURL);
     this.showMessagesLoader = false;
   }
 
