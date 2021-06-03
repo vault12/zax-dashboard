@@ -268,9 +268,18 @@ export class AppComponent implements OnInit {
   }
 
   async deleteMessages(mailbox: MailboxView): Promise<void> {
-    const noncesToDelete = mailbox.messages.filter(message => message.isSelected)
-      .map(message => message.nonce);
+    const messagesToDelete = mailbox.messages.filter(message => message.isSelected);
+    const noncesToDelete = messagesToDelete.map(message => message.nonce);
+
+    const fileIDsToDelete = messagesToDelete
+      .filter(message => message.kind === ZaxMessageKind.file)
+      .map((message: ZaxFileMessage) => message.uploadID);
+
     await mailbox.connectToRelay(this.relayURL);
+    for (const uploadID of fileIDsToDelete) {
+      await mailbox.deleteFile(this.relayURL, uploadID);
+    }
+
     await mailbox.delete(this.relayURL, noncesToDelete);
 
     mailbox.messages = mailbox.messages.filter(message => !message.isSelected);
