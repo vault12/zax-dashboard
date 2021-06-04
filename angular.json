@@ -24,6 +24,7 @@
             ],
             "styles": [
               "node_modules/bootswatch/dist/sandstone/bootstrap.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.css"
             ],
             "scripts": [
