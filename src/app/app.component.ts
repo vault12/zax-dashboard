@@ -67,7 +67,7 @@ export class AppComponent implements OnInit {
     } else {
       // Use current location otherwise
       // NOTE: Take care not to mix up ports when both are running locally
-      this.relayURL = 'https://z2.vault12.com'; //window.location.origin;
+      this.relayURL = window.location.origin;
     }
     this.editingURL = this.relayURL;
   }

@@ -212,7 +212,7 @@
                   <textarea *ngIf="message.kind !== ZaxMessageKind.file" readonly
                     class="form-control">{{ message.data }}</textarea>
                   <div *ngIf="message.kind === ZaxMessageKind.file">
-                    <strong>{{ message.data.name }}</strong>
+                    <strong>📎 {{ message.data.name }}</strong>
                     <span class="text-muted"> ({{ message.data.orig_size }} bytes)</span>
                     <div class="mt-2">
                       <button type="button" class="btn btn-outline-success" (click)="downloadFile(message)">
