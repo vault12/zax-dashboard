@@ -189,7 +189,7 @@
               (click)="deleteMessages(activeMailbox)">Delete</button>
           </div>
 
-          <table class="table" *ngIf="!showMessagesLoader">
+          <table class="table messages" *ngIf="!showMessagesLoader">
             <thead>
               <tr>
                 <th>
@@ -197,6 +197,7 @@
                 </th>
                 <th>From</th>
                 <th>Message</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -211,14 +212,32 @@
                   <textarea *ngIf="message.kind !== ZaxMessageKind.file" readonly
                     class="form-control">{{ message.data }}</textarea>
                   <div *ngIf="message.kind === ZaxMessageKind.file">
-                    {{ message.data.name }} ({{ message.data.orig_size }} bytes)
-                    <button type="button" class="btn btn-outline-success" (click)="downloadFile(message)">
-                      Download</button>
+                    <strong>{{ message.data.name }}</strong>
+                    <span class="text-muted"> ({{ message.data.orig_size }} bytes)</span>
+                    <div class="mt-2">
+                      <button type="button" class="btn btn-outline-success" (click)="downloadFile(message)">
+                        Download</button>
+                    </div>
                   </div>
-                  <div class="d-flex align-items-center justify-content-between">
-                    <small class="text-muted">Nonce: {{ message.nonce }}</small>
-                    <small class="text-muted">Time: {{ message.time * 1000 | date:'short' }}</small>
+                  <div class="collapse" [id]="message.nonce | nonce">
+                    <table class="table table-sm table-borderless mt-2 mb-0">
+                      <tbody>
+                        <tr>
+                          <th scope="row">Nonce</th>
+                          <td class="word-break">{{ message.nonce }}</td>
+                        </tr>
+                        <tr>
+                          <th scope="row">Time</th>
+                          <td>{{ message.time * 1000 | date:'medium' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
+                </td>
+                <td class="text-center">
+                  <a data-bs-toggle="collapse" href="#{{ message.nonce | nonce }}" role="button" aria-expanded="false">
+                    <h4><i class="bi bi-chevron-down"></i></h4>
+                  </a>
                 </td>
               </tr>
             </tbody>
