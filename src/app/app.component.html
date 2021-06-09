@@ -182,14 +182,14 @@
         <div class="col" *ngIf="activeMailbox.counter > 0">
           <div class="d-flex align-items-center justify-content-between my-4">
             <button class="btn btn-success" type="button" (click)="getMessages(activeMailbox)">
-              <span *ngIf="showMessagesLoader" class="spinner-border spinner-border-sm"
+              <span *ngIf="UIFlags[UIAction.showMessagesLoadingSpinner]" class="spinner-border spinner-border-sm"
                 role="status" aria-hidden="true"></span>
               Fetch All</button>
             <button class="btn btn-danger" type="button" [disabled]="!hasSelectedMessages()"
-              (click)="deleteMessages(activeMailbox)">Delete</button>
+              (click)="deleteMessages()">Delete</button>
           </div>
 
-          <table class="table messages" *ngIf="!showMessagesLoader">
+          <table class="table messages" *ngIf="!UIFlags[UIAction.showMessagesLoadingSpinner]">
             <thead>
               <tr>
                 <th>
@@ -250,7 +250,7 @@
           <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.messageSent]">Message sent!</span>
           <form class="d-grid gap-2 needs-validation" #messageForm="ngForm" novalidate
             [class.was-validated]="messageForm.submitted && messageForm.touched"
-            (submit)="sendMessage(activeMailbox, recipient.value, message.value); messageForm.reset()">
+            (submit)="sendMessage(recipient.value, message.value); messageForm.reset()">
             <select type="text" name="recipient" #recipient ngModel class="form-select" required>
               <option value="" disabled selected>Recipient</option>
               <option *ngFor="let guest of activeMailbox.recipients" value="{{ guest }}">{{ guest }}</option>
@@ -267,7 +267,7 @@
           <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.fileSent]">File sent!</span>
           <form class="d-grid gap-2 needs-validation" #fileForm="ngForm" novalidate
             [class.was-validated]="fileForm.submitted && fileForm.touched"
-            (submit)="sendFile(activeMailbox, fileRecipient.value); fileForm.reset()">
+            (submit)="sendFile(fileRecipient.value); fileForm.reset()">
             <select type="text" name="fileRecipient" #fileRecipient ngModel class="form-select" required>
               <option value="" disabled selected>Recipient</option>
               <option *ngFor="let guest of activeMailbox.recipients" value="{{ guest }}">{{ guest }}</option>

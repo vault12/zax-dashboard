@@ -13,7 +13,8 @@ enum UIAction {
   keyAdded,
   mailboxCreated,
   messageSent,
-  fileSent
+  fileSent,
+  showMessagesLoadingSpinner
 }
 
 @Component({
@@ -31,7 +32,6 @@ export class AppComponent implements OnInit {
 
   // UI flags
   showRefreshLoader = false;
-  showMessagesLoader = false;
   isEditing = false;
 
   ZaxMessageKind = ZaxMessageKind;
@@ -41,7 +41,8 @@ export class AppComponent implements OnInit {
     [UIAction.keyAdded]: false,
     [UIAction.mailboxCreated]: false,
     [UIAction.messageSent]: false,
-    [UIAction.fileSent]: false
+    [UIAction.fileSent]: false,
+    [UIAction.showMessagesLoadingSpinner]: false
   };
 
   // UI defaults
@@ -50,15 +51,15 @@ export class AppComponent implements OnInit {
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
 
+  // -------------------------
+  // Initialization
+  // -------------------------
+
   async ngOnInit(): Promise<void> {
     NaCl.setInstance();
     this.setDefaultRelay();
     await this.initMailboxes();
   }
-
-  // -------------------------
-  // Initialization
-  // -------------------------
 
   private setDefaultRelay() {
     if (window.location.origin.indexOf('github.io') > -1) {
@@ -121,7 +122,7 @@ export class AppComponent implements OnInit {
    * Delete the Mailbox from local storage, remove it on UI, and remove its keys
    * from keyrings of other mailboxes
    */
-   async deleteMailbox(mailbox: MailboxView): Promise<void> {
+  async deleteMailbox(mailbox: MailboxView): Promise<void> {
     this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
     for (const mbx of this.mailboxes) {
       await mbx.keyRing.removeGuest(mailbox.identity);
@@ -129,53 +130,6 @@ export class AppComponent implements OnInit {
     await mailbox.selfDestruct();
     localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
     this.activeMailbox = null;
-  }
-
-  async sendFile(mailbox: MailboxView, guest: string): Promise<void> {
-    if (!this.selectedFile) {
-      return;
-    }
-
-    const binary = new Uint8Array(await this.selectedFile.arrayBuffer());
-    const metadata = {
-      name: this.selectedFile.name,
-      orig_size: this.selectedFile.size,
-      modified: this.selectedFile.lastModified
-    };
-
-    await mailbox.connectToRelay(this.relayURL);
-    const { skey, uploadID, max_chunk_size } =
-      await mailbox.startFileUpload(this.relayURL, guest, metadata);
-
-    if (this.selectedFile.size >= max_chunk_size) {
-      alert('Error, file size is too big');
-      return;
-    }
-
-    await mailbox.uploadFileChunk(this.relayURL, uploadID, binary, 0, 1, skey);
-    this.showBadge(UIAction.fileSent);
-    await this.refreshCounter();
-  }
-
-  async downloadFile(message: ZaxFileMessage): Promise<void> {
-    await this.activeMailbox.connectToRelay(this.relayURL);
-    const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL, message.uploadID, 0, message.data.skey);
-
-    const url = window.URL.createObjectURL(new Blob([chunk]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', message.data.name);
-    document.body.appendChild(link);
-    link.click();
-  }
-
-  /**
-   * Display the Mailbox on UI
-   */
-  async selectMailbox(mailbox: MailboxView): Promise<void> {
-    this.activeMailbox = mailbox;
-    this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
-    await this.getMessages(mailbox);
   }
 
   /**
@@ -195,6 +149,33 @@ export class AppComponent implements OnInit {
 
     // fetch message count for these new mailboxes only
     await this.refreshCounter(mailboxes);
+  }
+
+  /**
+   * Display the Mailbox on UI
+   */
+   async selectMailbox(mailbox: MailboxView): Promise<void> {
+    this.activeMailbox = mailbox;
+    this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
+    await this.getMessages(mailbox);
+  }
+
+  async addPublicKey(mailbox: MailboxView, name: string, key: string): Promise<void> {
+    await mailbox.keyRing.addGuest(name, key);
+    this.showBadge(UIAction.keyAdded);
+    await this.selectMailbox(mailbox);
+  }
+
+  async refreshCounter(names?: string[]): Promise<void> {
+    this.showRefreshLoader = true;
+    // take either chosen names, or all mailboxes
+    const mailboxes = names ?
+      this.mailboxes.filter(mailbox => names.includes(mailbox.identity)) : this.mailboxes;
+    for (const mbx of mailboxes) {
+      await mbx.connectToRelay(this.relayURL);
+      mbx.counter = await mbx.count(this.relayURL);
+    }
+    this.showRefreshLoader = false;
   }
 
   private async addMailbox(name: string, options?: { seed?: string, secret?: string }): Promise<string> {
@@ -232,60 +213,102 @@ export class AppComponent implements OnInit {
   }
 
   // -------------------------
-  // Glow operations
+  // Message operations
   // -------------------------
 
-  async addPublicKey(mailbox: MailboxView, name: string, key: string): Promise<void> {
-    await mailbox.keyRing.addGuest(name, key);
-    this.showBadge(UIAction.keyAdded);
-    await this.selectMailbox(mailbox);
-  }
-
-  async refreshCounter(names?: string[]): Promise<void> {
-    this.showRefreshLoader = true;
-    // take either chosen names, or all mailboxes
-    const mailboxes = names ?
-      this.mailboxes.filter(mailbox => names.includes(mailbox.identity)) : this.mailboxes;
-    for (const mbx of mailboxes) {
-      await mbx.connectToRelay(this.relayURL);
-      mbx.counter = await mbx.count(this.relayURL);
-    }
-    this.showRefreshLoader = false;
-  }
-
+  /**
+   * Fetch messages in a given mailbox from the relay
+   */
   async getMessages(mailboxView: MailboxView): Promise<void> {
-    this.showMessagesLoader = true;
+    this.UIFlags[UIAction.showMessagesLoadingSpinner] = true;
     await mailboxView.connectToRelay(this.relayURL);
     mailboxView.messages = await mailboxView.download(this.relayURL);
-    this.showMessagesLoader = false;
+    this.UIFlags[UIAction.showMessagesLoadingSpinner] = false;
   }
 
-  async sendMessage(mailbox: MailboxView, guest: string, message: string): Promise<void> {
-    await mailbox.connectToRelay(this.relayURL);
-    await mailbox.upload(this.relayURL, guest, message);
+  /**
+   * Send an encrypted text message to a specified guest
+   */
+  async sendMessage(guest: string, message: string): Promise<void> {
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    await this.activeMailbox.upload(this.relayURL, guest, message);
     this.showBadge(UIAction.messageSent);
     await this.refreshCounter();
   }
 
-  async deleteMessages(mailbox: MailboxView): Promise<void> {
-    const messagesToDelete = mailbox.messages.filter(message => message.isSelected);
+  /**
+   * Delete selected messages and files from the relay
+   */
+  async deleteMessages(): Promise<void> {
+    const messagesToDelete = this.activeMailbox.messages.filter(message => message.isSelected);
     const noncesToDelete = messagesToDelete.map(message => message.nonce);
-
     const fileIDsToDelete = messagesToDelete
       .filter(message => message.kind === ZaxMessageKind.file)
       .map((message: ZaxFileMessage) => message.uploadID);
 
-    await mailbox.connectToRelay(this.relayURL);
+    // Delete files before deleting file messages
+    await this.activeMailbox.connectToRelay(this.relayURL);
     for (const uploadID of fileIDsToDelete) {
-      await mailbox.deleteFile(this.relayURL, uploadID);
+      await this.activeMailbox.deleteFile(this.relayURL, uploadID);
     }
 
-    await mailbox.delete(this.relayURL, noncesToDelete);
+    // Delete file messages
+    await this.activeMailbox.delete(this.relayURL, noncesToDelete);
 
-    mailbox.messages = mailbox.messages.filter(message => !message.isSelected);
+    // Update messages list and counter without polling server
+    this.activeMailbox.messages = this.activeMailbox.messages.filter(message => !message.isSelected);
+    this.activeMailbox.counter = Object.keys(this.activeMailbox.messages).length;
+  }
 
-    // Update counter without polling server
-    mailbox.counter = Object.keys(mailbox.messages).length;
+  // -------------------------
+  // File operations
+  // -------------------------
+
+  /**
+   * Send an encrypted file to a specified guest. Only single chunk is allowed for simplicity
+   */
+  async sendFile(guest: string): Promise<void> {
+    if (!this.selectedFile) {
+      return;
+    }
+
+    const binary = new Uint8Array(await this.selectedFile.arrayBuffer());
+    const metadata = {
+      name: this.selectedFile.name,
+      orig_size: this.selectedFile.size,
+      modified: this.selectedFile.lastModified
+    };
+
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    const { skey, uploadID, max_chunk_size } =
+      await this.activeMailbox.startFileUpload(this.relayURL, guest, metadata);
+
+    if (this.selectedFile.size >= max_chunk_size) {
+      alert(`Error, maximum file size is ${max_chunk_size} bytes`);
+      return;
+    }
+
+    await this.activeMailbox.uploadFileChunk(this.relayURL, uploadID, binary, 0, 1, skey);
+    this.showBadge(UIAction.fileSent);
+    await this.refreshCounter();
+  }
+
+  /**
+   * Download the file and trigger browser's download capability
+   */
+  async downloadFile(message: ZaxFileMessage): Promise<void> {
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL,
+      message.uploadID, 0, message.data.skey);
+
+    // DOM trick to let browser start downloading the binary file
+    const url = window.URL.createObjectURL(new Blob([chunk]));
+    const link = document.createElement('a');
+    link.href = url;
+    // Use original file name
+    link.setAttribute('download', message.data.name);
+    document.body.appendChild(link);
+    link.click();
   }
 
   // -------------------------
