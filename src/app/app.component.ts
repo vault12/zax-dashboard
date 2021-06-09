@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage } from '@vault12/glow.ts';
 
+// Glow type extensions to represent data downloaded from the relay conveniently
 type MessageView = ZaxParsedMessage & { isSelected?: boolean };
-
 interface MailboxView extends Mailbox {
   counter?: number;
   messages?: MessageView[];
@@ -14,7 +14,8 @@ enum UIAction {
   mailboxCreated,
   messageSent,
   fileSent,
-  showMessagesLoadingSpinner
+  messagesLoading,
+  counterLoading
 }
 
 @Component({
@@ -26,28 +27,26 @@ export class AppComponent implements OnInit {
   // Needed to find in local storage and load all previously generated mailboxes
   private readonly mailboxPrefix = '_mailbox';
 
+  // Cached mailbox and file data
   mailboxes: MailboxView[] = [];
   activeMailbox: MailboxView = null;
   selectedFile: File;
 
-  // UI flags
-  showRefreshLoader = false;
-  isEditing = false;
-
   ZaxMessageKind = ZaxMessageKind;
 
+  // UI defaults
   UIAction = UIAction;
   UIFlags = {
     [UIAction.keyAdded]: false,
     [UIAction.mailboxCreated]: false,
     [UIAction.messageSent]: false,
     [UIAction.fileSent]: false,
-    [UIAction.showMessagesLoadingSpinner]: false
+    [UIAction.messagesLoading]: false,
+    [UIAction.counterLoading]: false
   };
-
-  // UI defaults
   relayURL: string;
   editingURL: string;
+  isEditing = false;
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
 
@@ -79,6 +78,7 @@ export class AppComponent implements OnInit {
     for (const key of localKeys) {
       await this.generateMailbox(localStorage.getItem(key));
     }
+    // otherwise, start with two empty mailboxes
     if (!localKeys.length) {
       await this.addMailbox('Alice');
       await this.addMailbox('Bob');
@@ -154,28 +154,34 @@ export class AppComponent implements OnInit {
   /**
    * Display the Mailbox on UI
    */
-   async selectMailbox(mailbox: MailboxView): Promise<void> {
+  async selectMailbox(mailbox: MailboxView): Promise<void> {
     this.activeMailbox = mailbox;
     this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
     await this.getMessages(mailbox);
   }
 
-  async addPublicKey(mailbox: MailboxView, name: string, key: string): Promise<void> {
-    await mailbox.keyRing.addGuest(name, key);
+  /**
+   * Add a new guest to the currently selected mailbox
+   */
+  async addPublicKey(name: string, key: string): Promise<void> {
+    await this.activeMailbox.keyRing.addGuest(name, key);
     this.showBadge(UIAction.keyAdded);
-    await this.selectMailbox(mailbox);
+    await this.selectMailbox(this.activeMailbox);
   }
 
-  async refreshCounter(names?: string[]): Promise<void> {
-    this.showRefreshLoader = true;
+  /**
+   * Fetch the number of messages in all mailboxes, or in specifies ones
+   */
+  async refreshCounter(mailboxNames?: string[]): Promise<void> {
+    this.UIFlags[UIAction.counterLoading] = true;
     // take either chosen names, or all mailboxes
-    const mailboxes = names ?
-      this.mailboxes.filter(mailbox => names.includes(mailbox.identity)) : this.mailboxes;
+    const mailboxes = mailboxNames ?
+      this.mailboxes.filter(mailbox => mailboxNames.includes(mailbox.identity)) : this.mailboxes;
     for (const mbx of mailboxes) {
       await mbx.connectToRelay(this.relayURL);
       mbx.counter = await mbx.count(this.relayURL);
     }
-    this.showRefreshLoader = false;
+    this.UIFlags[UIAction.counterLoading] = false;
   }
 
   private async addMailbox(name: string, options?: { seed?: string, secret?: string }): Promise<string> {
@@ -220,10 +226,10 @@ export class AppComponent implements OnInit {
    * Fetch messages in a given mailbox from the relay
    */
   async getMessages(mailboxView: MailboxView): Promise<void> {
-    this.UIFlags[UIAction.showMessagesLoadingSpinner] = true;
+    this.UIFlags[UIAction.messagesLoading] = true;
     await mailboxView.connectToRelay(this.relayURL);
     mailboxView.messages = await mailboxView.download(this.relayURL);
-    this.UIFlags[UIAction.showMessagesLoadingSpinner] = false;
+    this.UIFlags[UIAction.messagesLoading] = false;
   }
 
   /**

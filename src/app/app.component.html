@@ -44,7 +44,7 @@
         <div class="d-flex d-sm-block d-xl-flex align-items-center mb-3">
           <h4 class="flex-fill mb-0">Mailboxes</h4>
           <button class="btn btn-success mt-sm-2 mt-xl-0" type="button" (click)="refreshCounter()">
-            <span *ngIf="showRefreshLoader" class="spinner-border spinner-border-sm"
+            <span *ngIf="UIFlags[UIAction.counterLoading]" class="spinner-border spinner-border-sm"
               role="status" aria-hidden="true"></span>
             Refresh
           </button>
@@ -182,14 +182,14 @@
         <div class="col" *ngIf="activeMailbox.counter > 0">
           <div class="d-flex align-items-center justify-content-between my-4">
             <button class="btn btn-success" type="button" (click)="getMessages(activeMailbox)">
-              <span *ngIf="UIFlags[UIAction.showMessagesLoadingSpinner]" class="spinner-border spinner-border-sm"
+              <span *ngIf="UIFlags[UIAction.messagesLoading]" class="spinner-border spinner-border-sm"
                 role="status" aria-hidden="true"></span>
               Fetch All</button>
             <button class="btn btn-danger" type="button" [disabled]="!hasSelectedMessages()"
               (click)="deleteMessages()">Delete</button>
           </div>
 
-          <table class="table messages" *ngIf="!UIFlags[UIAction.showMessagesLoadingSpinner]">
+          <table class="table messages" *ngIf="!UIFlags[UIAction.messagesLoading]">
             <thead>
               <tr>
                 <th>
@@ -284,7 +284,7 @@
           <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.keyAdded]">Key added!</span>
           <form class="d-grid gap-2 needs-validation" #keyForm="ngForm" novalidate
             [class.was-validated]="keyForm.submitted && keyForm.touched"
-            (submit)="addPublicKey(activeMailbox, keyName.value, keyKey.value); keyForm.reset()">
+            (submit)="addPublicKey(keyName.value, keyKey.value); keyForm.reset()">
             <input type="text" ngModel name="name" #keyName placeholder="User Name" class="form-control" required>
             <input type="text" ngModel name="key" #keyKey placeholder="Public Key (Base64)"
               class="form-control" required>
