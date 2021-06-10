@@ -4,9 +4,12 @@
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
   </a>
-  [![dependency Status](https://david-dm.org/ismaestro/angular8-example-app.svg)](https://david-dm.org/vault12/zax-dashboard#info=dependencies)
-  [![devDependency Status](https://david-dm.org/ismaestro/angular8-example-app/dev-status.svg)](https://david-dm.org/vault12/zax-dashboard#info=devDependencies)
-  [![demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://vault12.github.io/zax-dashboard/)
+  <a href="https://david-dm.org/vault12/zax-dashboard#info=dependencies">
+    <img src="https://david-dm.org/vault12/zax-dashboard.svg" alt="dependency Status" />
+  </a>
+  <a href="https://david-dm.org/vault12/zax-dashboard#info=devDependencies">
+    <img src="https://david-dm.org/vault12/zax-dashboard/dev-status.svg" alt="devDependency Status" />
+  </a>
   <a href="http://makeapullrequest.com">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
   </a>
