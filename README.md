@@ -1,10 +1,21 @@
 # Zax Dashboard
 
-[![dependency Status](https://david-dm.org/ismaestro/angular8-example-app.svg)](https://david-dm.org/vault12/zax-dashboard#info=dependencies)
-[![devDependency Status](https://david-dm.org/ismaestro/angular8-example-app/dev-status.svg)](https://david-dm.org/vault12/zax-dashboard#info=devDependencies)
-[![demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://vault12.github.io/zax-dashboard/)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
+  </a>
+  [![dependency Status](https://david-dm.org/ismaestro/angular8-example-app.svg)](https://david-dm.org/vault12/zax-dashboard#info=dependencies)
+  [![devDependency Status](https://david-dm.org/ismaestro/angular8-example-app/dev-status.svg)](https://david-dm.org/vault12/zax-dashboard#info=devDependencies)
+  [![demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://vault12.github.io/zax-dashboard/)
+  <a href="http://makeapullrequest.com">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
+  </a>
+  <a href="https://twitter.com/_Vault12_">
+    <img src="https://img.shields.io/twitter/follow/_Vault12_?label=Follow&style=social" alt="Follow" />
+  </a>
+</p>
 
-**Zax Dashboard** is a simple [Angular](https://angular.io) single page app to interact with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow](https://github.com/vault12/glow) library to provide a user-friendly access point to given relay internal mailboxes. We maintain a live [Test Server](https://z.vault12.com) that runs our latest build. For testing purposes expiration of any communication on that relay is set for 30 minutes. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
+**Zax Dashboard** is a simple [Angular](https://angular.io) single page web app introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. We maintain a live [Test Server](https://zt.vault12.com) that runs our latest build. For testing purposes expiration of any communication on that relay is set for 30 minutes. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
 
 ## Getting started
 
