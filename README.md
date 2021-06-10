@@ -1,6 +1,11 @@
 # Zax Dashboard
 
 <p align="center">
+  <img src="https://user-images.githubusercontent.com/1370944/121530189-d7da7e80-ca05-11eb-9242-c564547b425a.jpg"
+    alt="Vault12 Zax Dashboard">
+</p>
+
+<p align="center">
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
   </a>
