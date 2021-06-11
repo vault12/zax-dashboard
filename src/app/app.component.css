@@ -31,3 +31,15 @@ table.messages th:nth-child(4) {
 .word-break {
   word-break: break-all;
 }
+
+a[aria-expanded=true] .bi-chevron-down, a[aria-expanded=false] .bi-chevron-up {
+  display: none;
+}
+
+a[aria-expanded=false] .bi-chevron-down, a[aria-expanded=true] .bi-chevron-up {
+  display: block;
+}
+
+h4 {
+  margin-bottom: 0;
+}
