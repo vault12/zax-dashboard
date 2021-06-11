@@ -18,6 +18,11 @@ enum UIAction {
   counterLoading
 }
 
+// Set by default on Zax relays, hardcoded here for simplicity.
+// However for multi-chunk uploads it's better to rely on `max_chunk_size` value,
+// received from `startFileUpload` call
+const maxFileSize = 512000;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -278,6 +283,11 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    if (this.selectedFile.size >= maxFileSize) {
+      alert(`Error, maximum file size is ${maxFileSize} bytes`);
+      return;
+    }
+
     const binary = new Uint8Array(await this.selectedFile.arrayBuffer());
     const metadata = {
       name: this.selectedFile.name,
@@ -286,13 +296,7 @@ export class AppComponent implements OnInit {
     };
 
     await this.activeMailbox.connectToRelay(this.relayURL);
-    const { skey, uploadID, max_chunk_size } =
-      await this.activeMailbox.startFileUpload(this.relayURL, guest, metadata);
-
-    if (this.selectedFile.size >= max_chunk_size) {
-      alert(`Error, maximum file size is ${max_chunk_size} bytes`);
-      return;
-    }
+    const { skey, uploadID } = await this.activeMailbox.startFileUpload(this.relayURL, guest, metadata);
 
     await this.activeMailbox.uploadFileChunk(this.relayURL, uploadID, binary, 0, 1, skey);
     this.showBadge(UIAction.fileSent);
