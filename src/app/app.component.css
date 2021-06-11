@@ -4,6 +4,10 @@
   opacity: 0;
 }
 
+.badge.bg-info {
+  font-size: 1.2em;
+}
+
 .list-group .badge, .badge-show {
   opacity: 1;
 }

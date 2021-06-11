@@ -93,7 +93,7 @@
         </ul>
 
         <div *ngIf="newMailboxSubscreen !== 'multiple'">
-          <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.mailboxCreated]">Mailbox created!</span>
+          <span class="badge bg-info" [class.badge-show]="UIFlags[UIAction.mailboxCreated]">Mailbox created!</span>
           <form class="d-grid gap-3 needs-validation" #newMailboxForm="ngForm" novalidate
             [class.was-validated]="newMailboxForm.submitted && newMailboxForm.touched"
             (submit)="createMailbox(newMailboxForm.form.controls.name?.value,
@@ -248,7 +248,7 @@
 
       <div class="row" *ngIf="viewMailboxSubscreen === 'sendMessage'">
         <div class="col-sm-6">
-          <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.messageSent]">Message sent!</span>
+          <span class="badge bg-info" [class.badge-show]="UIFlags[UIAction.messageSent]">Message sent!</span>
           <form class="d-grid gap-2 needs-validation" #messageForm="ngForm" novalidate
             [class.was-validated]="messageForm.submitted && messageForm.touched"
             (submit)="sendMessage(recipient.value, message.value); messageForm.reset()">
@@ -265,7 +265,7 @@
 
       <div class="row" *ngIf="viewMailboxSubscreen === 'sendFile'">
         <div class="col-sm-6">
-          <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.fileSent]">File sent!</span>
+          <span class="badge bg-info" [class.badge-show]="UIFlags[UIAction.fileSent]">File sent!</span>
           <form class="d-grid gap-2 needs-validation" #fileForm="ngForm" novalidate
             [class.was-validated]="fileForm.submitted && fileForm.touched"
             (submit)="sendFile(fileRecipient.value); fileForm.reset()">
@@ -282,7 +282,7 @@
 
       <div class="row" *ngIf="viewMailboxSubscreen === 'addKey'">
         <div class="col-sm-6">
-          <span class="badge bg-success" [class.badge-show]="UIFlags[UIAction.keyAdded]">Key added!</span>
+          <span class="badge bg-info" [class.badge-show]="UIFlags[UIAction.keyAdded]">Key added!</span>
           <form class="d-grid gap-2 needs-validation" #keyForm="ngForm" novalidate
             [class.was-validated]="keyForm.submitted && keyForm.touched"
             (submit)="addPublicKey(keyName.value, keyKey.value); keyForm.reset()">
