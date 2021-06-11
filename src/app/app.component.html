@@ -1,8 +1,8 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container">
-    <a class="navbar-brand" href="#">Zax Relay</a>
-    <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand" href="#">Zax Dashboard</a>
+    <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbar1"
+      aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -44,8 +44,8 @@
         <div class="d-flex d-sm-block d-xl-flex align-items-center mb-3">
           <h4 class="flex-fill mb-0">Mailboxes</h4>
           <button class="btn btn-success mt-sm-2 mt-xl-0" type="button" (click)="refreshCounter()">
-            <span *ngIf="UIFlags[UIAction.counterLoading]" class="spinner-border spinner-border-sm"
-              role="status" aria-hidden="true"></span>
+            <span *ngIf="UIFlags[UIAction.counterLoading]" class="spinner-border spinner-border-sm" role="status"
+              aria-hidden="true"></span>
             Refresh
           </button>
         </div>
@@ -63,16 +63,31 @@
       </div>
 
       <div class="d-grid">
-        <button type="button" class="btn btn-outline-success" *ngIf="mailboxes.length" (click)="activeMailbox = null">
+        <button type="button" class="btn btn-outline-success" *ngIf="mailboxes.length"
+          (click)="activeMailbox = null; showNewMailboxScreen = true">
           + Add
         </button>
       </div>
     </div>
 
-    <div class="col-sm-8 col-md-9 my-5 my-sm-0" *ngIf="!activeMailbox">
-      <h2 class="text-center align-middle my-4 text-muted">No mailbox selected</h2>
+    <div class="col-sm-8 col-md-9 my-5 my-sm-0" *ngIf="!activeMailbox && !showNewMailboxScreen">
+      <h4 class="text-center align-middle mt-1 mb-4">Zax Dashboard</h4>
+      <div class="col-lg-8 offset-lg-2 text-center">
+        <p><strong>Zax Dashboard</strong> is a simple demo app to interact with
+          <a href="https://github.com/vault12/zax" class="text-muted" target="_blank">Zax Relay</a>,
+          a NaCl-based Cryptographic Relay.
+          It uses <a href="https://github.com/vault12/glow.ts" class="text-muted" target="_blank">Glow</a> library to
+          provide a user-friendly access point to given relay internal mailboxes.
+        </p>
+        <p>
+          To start, please select one of the mailboxes from the list, or
+          <a href="#" (click)="activeMailbox = null; showNewMailboxScreen = true">create a new one</a>.
+        </p>
+      </div>
+    </div>
+    <div class="col-sm-8 col-md-9 my-5 my-sm-0" *ngIf="!activeMailbox && showNewMailboxScreen">
       <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
-        <hr />
+        <h4 class="flex-fill mb-4 mt-1">Add Mailbox</h4>
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a class="nav-link" [class.active]="newMailboxSubscreen === 'new'"
@@ -118,7 +133,7 @@
         </div>
 
         <div class="mt-4" *ngIf="newMailboxSubscreen === 'multiple'">
-          <div class="d-grid gap-4">
+          <div class="d-grid pt-3 gap-4">
             <select class="form-select" #quantity>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -171,7 +186,7 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" [class.active]="viewMailboxSubscreen === 'addKey'"
-            (click)="viewMailboxSubscreen = 'addKey'">Add public key</a>
+            (click)="viewMailboxSubscreen = 'addKey'">Add a public key</a>
         </li>
       </ul>
 
@@ -182,8 +197,8 @@
         <div class="col" *ngIf="activeMailbox.counter > 0">
           <div class="d-flex align-items-center justify-content-between my-4">
             <button class="btn btn-success" type="button" (click)="getMessages(activeMailbox)">
-              <span *ngIf="UIFlags[UIAction.messagesLoading]" class="spinner-border spinner-border-sm"
-                role="status" aria-hidden="true"></span>
+              <span *ngIf="UIFlags[UIAction.messagesLoading]" class="spinner-border spinner-border-sm" role="status"
+                aria-hidden="true"></span>
               Fetch All</button>
             <button class="btn btn-danger" type="button" [disabled]="!hasSelectedMessages()"
               (click)="deleteMessages()">Delete</button>
@@ -256,8 +271,8 @@
               <option value="" disabled selected>Recipient</option>
               <option *ngFor="let guest of activeMailbox.recipients" value="{{ guest }}">{{ guest }}</option>
             </select>
-            <textarea ngModel name="message" #message placeholder="Message"
-              rows="3" required class="form-control"></textarea>
+            <textarea ngModel name="message" #message placeholder="Message" rows="3" required
+              class="form-control"></textarea>
             <button class="btn btn-success" type="submit" [disabled]="!messageForm.valid">Send</button>
           </form>
         </div>
@@ -287,8 +302,8 @@
             [class.was-validated]="keyForm.submitted && keyForm.touched"
             (submit)="addPublicKey(keyName.value, keyKey.value); keyForm.reset()">
             <input type="text" ngModel name="name" #keyName placeholder="User Name" class="form-control" required>
-            <input type="text" ngModel name="key" #keyKey placeholder="Public Key (Base64)"
-              class="form-control" required>
+            <input type="text" ngModel name="key" #keyKey placeholder="Public Key (Base64)" class="form-control"
+              required>
             <button class="btn btn-success" type="submit" [disabled]="!keyForm.valid">Add</button>
           </form>
         </div>

@@ -52,6 +52,7 @@ export class AppComponent implements OnInit {
   relayURL: string;
   editingURL: string;
   isEditing = false;
+  showNewMailboxScreen = false;
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
 
