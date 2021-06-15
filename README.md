@@ -6,8 +6,8 @@
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.org/vault12/zax-dashboard">
-    <img src="https://travis-ci.org/vault12/zax-dashboard.svg?branch=master" alt="Travis Build Status" />
+  <a href="https://travis-ci.com/vault12/zax-dashboard">
+    <img src="https://travis-ci.com/vault12/zax-dashboard.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="https://vault12.github.io/zax-dashboard/">
     <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
@@ -15,6 +15,9 @@
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
   </a>
+</p>
+
+<p align="center">
   <a href="https://david-dm.org/vault12/zax-dashboard#info=dependencies">
     <img src="https://david-dm.org/vault12/zax-dashboard.svg" alt="dependency Status" />
   </a>
