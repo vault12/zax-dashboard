@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage } from '@vault12/glow.ts';
+import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage } from 'glow.ts';
 
 // Glow type extensions to represent data downloaded from the relay conveniently
 type MessageView = ZaxParsedMessage & { isSelected?: boolean };
