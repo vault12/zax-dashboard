@@ -6,6 +6,12 @@
 </p>
 
 <p align="center">
+  <a href="https://travis-ci.org/vault12/zax-dashboard">
+    <img src="https://travis-ci.org/vault12/zax-dashboard.svg?branch=master" alt="Travis Build Status" />
+  </a>
+  <a href="https://vault12.github.io/zax-dashboard/">
+    <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
+  </a>
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
   </a>
@@ -23,13 +29,19 @@
   </a>
 </p>
 
-**Zax Dashboard** is a simple [Angular](https://angular.io) single page web app introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. We maintain a live [Test Server](https://zt.vault12.com) that runs our latest build. For testing purposes expiration of any communication on that relay is set for 30 minutes. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
+**Zax Dashboard** is a simple [Angular](https://angular.io) single page web app introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
+
+## Demo
+
+We maintain a live [Test Server](https://zt.vault12.com) that runs the stable build of Zax Dashboard. For testing purposes expiration of any communication on that relay is set to *30 minutes*.
+
+You can also check the latest build of `master` branch on [Github Pages](https://vault12.github.io/zax-dashboard/).
 
 ## Getting started
 
-### NodeJS
+### Node.js
 
-In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of NodeJS installed.
+In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of [Node.js](https://nodejs.org) installed.
 
 ### Installation
 
@@ -51,7 +63,7 @@ Then navigate to `http://localhost:4200` in your browser. The app will automatic
 
 ## Build
 
-Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for **Github Pages**.
+Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/).
 
 ## License
 
