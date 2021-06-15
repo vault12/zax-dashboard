@@ -1,6 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { NgForm } from '@angular/forms';
+import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage } from 'glow.ts';
+
+// Glow type extensions to represent data downloaded from the relay conveniently
+type MessageView = ZaxParsedMessage & { isSelected?: boolean };
+interface MailboxView extends Mailbox {
+  counter?: number;
+  messages?: MessageView[];
+  recipients?: string[];
+}
+
+enum UIAction {
+  keyAdded,
+  mailboxCreated,
+  messageSent,
+  fileSent,
+  messagesLoading,
+  counterLoading
+}
 
 @Component({
   selector: 'app-root',
@@ -8,269 +24,315 @@ import { NgForm } from '@angular/forms';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  private mailboxPrefix = '_mailbox';
+  // Needed to find in local storage and load all previously generated mailboxes
+  private readonly mailboxPrefix = '_mailbox';
 
-  // Glow instances and mailboxes
-  private glow;
-  private relay;
-  private mailbox;
-  activeMailbox = null;
-  mailboxes = [];
+  // Cached mailbox and file data
+  mailboxes: MailboxView[] = [];
+  activeMailbox: MailboxView = null;
+  selectedFile: File;
 
-  // UI flags
-  showRefreshLoader = false;
-  showMessagesLoader = false;
-  messageSent = false;
-  keyAdded = false;
-  isEditing = false;
+  ZaxMessageKind = ZaxMessageKind;
 
   // UI defaults
+  UIAction = UIAction;
+  UIFlags = {
+    [UIAction.keyAdded]: false,
+    [UIAction.mailboxCreated]: false,
+    [UIAction.messageSent]: false,
+    [UIAction.fileSent]: false,
+    [UIAction.messagesLoading]: false,
+    [UIAction.counterLoading]: false
+  };
   relayURL: string;
   editingURL: string;
+  isEditing = false;
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
-  quantity = 5;
-
-  constructor(private http: HttpClient) {
-    this.initGlow();
-
-  }
-
-  ngOnInit() {
-    this.setDefaultRelay();
-    this.initRelay(this.relayURL);
-    this.initMailboxes();
-  }
 
   // -------------------------
   // Initialization
   // -------------------------
 
-  private initGlow() {
-    this.glow = (window as any).glow;
-    this.glow.CryptoStorage.startStorageSystem(new this.glow.SimpleStorageDriver());
-
-    this.mailbox = this.glow.MailBox;
-
-    this.glow.setAjaxImpl((url: string, data: string) => {
-      const request = this.http.post(url, data, {
-        headers: {
-          'Accept': 'text/plain',
-          'Content-Type': 'text/plain'
-        },
-        responseType: 'text'
-      });
-
-      return request.toPromise();
-    });
+  async ngOnInit(): Promise<void> {
+    NaCl.setInstance();
+    this.setDefaultRelay();
+    await this.initMailboxes();
   }
 
   private setDefaultRelay() {
-    if (window.location.origin.indexOf('github.io') > -1) {
-      // Use test server by default when running on http://vault12.github.io/zax-dashboard/
+    if (window.location.origin.indexOf('github.io') > -1 || window.location.origin.indexOf('localhost') > -1) {
+      // Use test server by default when running on http://vault12.github.io/zax-dashboard/ or locally
       this.relayURL = 'https://z.vault12.com';
     } else {
       // Use current location otherwise
       // NOTE: Take care not to mix up ports when both are running locally
-      this.relayURL = 'https://z2.vault12.com'; //window.location.origin;
+      this.relayURL = window.location.origin;
     }
     this.editingURL = this.relayURL;
   }
 
-  private initRelay(url: string) {
-    this.relay = new this.glow.Relay(url);
-  }
-
-  async initMailboxes() {
+  private async initMailboxes(): Promise<void> {
     // add all mailboxes stored in localStorage
-    var mbx_count = 0
-    var localKeys = Object.keys(localStorage)
+    const localKeys = Object.keys(localStorage).filter(key => key.startsWith(this.mailboxPrefix));
     for (const key of localKeys) {
-      if (key.indexOf(this.mailboxPrefix) === 0) {
-        mbx_count++
-        await this.generateMailbox(localStorage.getItem(key));
-      }
+      await this.generateMailbox(localStorage.getItem(key));
     }
-    if (mbx_count == 0)
-    {
-      await this.addMailbox('Alice',null, true)
-      await this.addMailbox('Bob',  null, true)
+    // otherwise, start with two empty mailboxes
+    if (!localKeys.length) {
+      await this.addMailbox('Alice');
+      await this.addMailbox('Bob');
     }
-    this.refreshCounter();
+    await this.refreshCounter();
   }
 
   // -------------------------
   // Relays
   // -------------------------
 
-  updateRelay() {
+  async updateRelay(): Promise<void> {
     this.relayURL = this.editingURL;
     this.isEditing = false;
-    this.initRelay(this.relayURL);
     // reload messages count from a new server
-    this.refreshCounter();
+    await this.refreshCounter();
   }
 
   // -------------------------
-  // Mailboxes
+  // Mailbox operations
   // -------------------------
 
-  async createMailbox(form: NgForm, type: string) {
-    const { name, seed, secret } = form.controls;
-    switch (type) {
-      case 'new':
-        await this.addMailbox(name.value);
-        break;
-      case 'secret':
-        await this.addMailbox(name.value, { secret: secret.value });
-        break;
-      case 'seed':
-        await this.addMailbox(name.value, { seed: seed.value });
-        break;
-      default:
-        throw new Error('Mailbox: unknown constructor type');
+  /**
+   * Create a new mailbox based on user's input and fetch the number of messages in it
+   */
+  async createMailbox(name: string, seed?: string, secret?: string): Promise<void> {
+    let mailboxName = null;
+    if (seed) {
+      mailboxName = await this.addMailbox(name, { seed });
+    } else if (secret) {
+      mailboxName = await this.addMailbox(name, { secret });
+    } else {
+      mailboxName = await this.addMailbox(name);
     }
 
-    form.reset();
+    this.showBadge(UIAction.mailboxCreated);
+    await this.refreshCounter([mailboxName]);
   }
 
-  private async addMailbox(name: string, options?, noRefresh?: boolean) {
+  /**
+   * Delete the Mailbox from local storage, remove it on UI, and remove its keys
+   * from keyrings of other mailboxes
+   */
+  async deleteMailbox(mailbox: MailboxView): Promise<void> {
+    this.mailboxes = this.mailboxes.filter(m => mailbox.identity !== m.identity);
+    for (const mbx of this.mailboxes) {
+      await mbx.keyRing.removeGuest(mailbox.identity);
+    }
+    await mailbox.selfDestruct();
+    localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
+    this.activeMailbox = null;
+  }
+
+  /**
+   * Auto-generate the defined amount of random Mailboxes
+   */
+  async addMultipleMailboxes(amount = 5): Promise<void> {
+    // sort names randomly and pick `amount` of them
+    const firstNames = ['Alice', 'Bob', 'Charlie', 'Chuck', 'Dave', 'Erin',
+      'Eve', 'Faith', 'Frank', 'Mallory', 'Oscar', 'Peggy', 'Pat', 'Sam',
+      'Sally', 'Sybil', 'Trent', 'Trudy', 'Victor', 'Walter', 'Wendy']
+      .sort(() => .5 - Math.random()).slice(0, amount);
+
+    // create multiple mailboxes
+    const mailboxes = await Promise.all(
+      firstNames.map(async (name) => await this.addMailbox(this.ensureUniqueName(name)))
+    );
+
+    // fetch message count for these new mailboxes only
+    await this.refreshCounter(mailboxes);
+  }
+
+  /**
+   * Display the Mailbox on UI
+   */
+  async selectMailbox(mailbox: MailboxView): Promise<void> {
+    this.activeMailbox = mailbox;
+    this.activeMailbox.recipients = Array.from(mailbox.keyRing.guests.keys());
+    await this.getMessages(mailbox);
+  }
+
+  /**
+   * Add a new guest to the currently selected mailbox
+   */
+  async addPublicKey(name: string, key: string): Promise<void> {
+    await this.activeMailbox.keyRing.addGuest(name, key);
+    this.showBadge(UIAction.keyAdded);
+    await this.selectMailbox(this.activeMailbox);
+  }
+
+  /**
+   * Fetch the number of messages in all mailboxes, or in specifies ones
+   */
+  async refreshCounter(mailboxNames?: string[]): Promise<void> {
+    this.UIFlags[UIAction.counterLoading] = true;
+    // take either chosen names, or all mailboxes
+    const mailboxes = mailboxNames ?
+      this.mailboxes.filter(mailbox => mailboxNames.includes(mailbox.identity)) : this.mailboxes;
+    for (const mbx of mailboxes) {
+      await mbx.connectToRelay(this.relayURL);
+      mbx.counter = await mbx.count(this.relayURL);
+    }
+    this.UIFlags[UIAction.counterLoading] = false;
+  }
+
+  private async addMailbox(name: string, options?: { seed?: string, secret?: string }): Promise<string> {
+    name = this.ensureUniqueName(name);
     const mbx = await this.generateMailbox(name, options);
     localStorage.setItem(`${this.mailboxPrefix}.${name}`, mbx.identity);
-    if (!noRefresh) {
-      this.refreshCounter();
-    }
+    return name;
   }
 
-  private async generateMailbox(name: string, options?) {
-    let mbx = null;
-    if (!options) {
-      mbx = await this.mailbox.new(name);
-    } else if (options.secret) {
-      mbx = await this.mailbox.fromSecKey(options.secret.fromBase64(), name);
-    } else if (options.seed) {
-      mbx = await this.mailbox.fromSeed(options.seed, name);
+  private async generateMailbox(name: string, options?: { seed?: string, secret?: string }) {
+    let mbx: MailboxView = null;
+    if (options?.seed) {
+      mbx = await Mailbox.fromSeed(name, options.seed);
+    } else if (options?.secret) {
+      mbx = await Mailbox.fromSecKey(name, options.secret);
     } else {
-      console.error('Error: incorrect options');
+      mbx = await Mailbox.new(name);
     }
 
     // share keys among mailboxes
     for (const m of this.mailboxes) {
-      await mbx.keyRing.addGuest(m.identity, m.getPubCommKey());
-      await m.keyRing.addGuest(mbx.identity, mbx.getPubCommKey());
+      await mbx.keyRing.addGuest(m.identity, m.keyRing.getPubCommKey());
+      await m.keyRing.addGuest(mbx.identity, mbx.keyRing.getPubCommKey());
     }
 
     this.mailboxes.push(mbx);
     return mbx;
   }
 
-  selectMailbox(mailbox) {
-    this.activeMailbox = mailbox;
-    this.activeMailbox.recipients = Object.keys(mailbox.keyRing.guestKeys);
-    this.getMessages(mailbox);
-  }
-
-  async deleteMailbox(mailbox) {
-    await this.destroyMailbox(mailbox);
-    localStorage.removeItem(`${this.mailboxPrefix}.${mailbox.identity}`);
-    this.activeMailbox = null;
-  }
-
-  async destroyMailbox(mailbox) {
-    const mbx = this.mailboxes.find(m => mailbox.keyRing.storage.root === m.keyRing.storage.root);
-    console.log(`Deleting mailbox ${mbx.identity}`);
-    await mbx.selfDestruct(true);
-    this.mailboxes = this.mailboxes.filter(m => mbx.keyRing.storage.root !== m.keyRing.storage.root);
-  }
-
-  async addMailboxes(amount: number = 5) {
-    // sort names randomly
-    const firstNames = ['Alice', 'Bob', 'Charlie', 'Chuck', 'Dave', 'Erin',
-      'Eve', 'Faith', 'Frank', 'Mallory', 'Oscar', 'Peggy', 'Pat', 'Sam',
-      'Sally', 'Sybil', 'Trent', 'Trudy', 'Victor', 'Walter', 'Wendy']
-      .sort(() => .5 - Math.random()).slice(0, amount);
-
-    for (let name of firstNames) {
-      // check if name is on the list already
-      const i = this.mailboxes.filter(m => m.identity.indexOf(name) > -1).length + 1;
-      // add index if it's on the list
-      if (i > 1) {
-        name = `${name} ${i}`;
-      }
-      this.addMailbox(name, null, true);
-    }
-    this.refreshCounter();
+  private ensureUniqueName(name: string): string {
+    // check if name is on the list already
+    const i = this.mailboxes.filter(m => m.identity.indexOf(name) > -1).length + 1;
+    // add index if it's on the list
+    return (i > 1) ? `${name} ${i}` : name;
   }
 
   // -------------------------
-  // Glow operations
+  // Message operations
   // -------------------------
 
-  addPublicKey(mailbox, form: NgForm) {
-    const { name, key } = form.controls;
-    if (mailbox.keyRing.addGuest(name.value, key.value)) {
-      this.keyAdded = true;
-      setTimeout(() => {
-        this.keyAdded = false;
-      }, 3000);
-    }
-    form.reset();
+  /**
+   * Fetch messages in a given mailbox from the relay
+   */
+  async getMessages(mailboxView: MailboxView): Promise<void> {
+    this.UIFlags[UIAction.messagesLoading] = true;
+    await mailboxView.connectToRelay(this.relayURL);
+    mailboxView.messages = await mailboxView.download(this.relayURL);
+    this.UIFlags[UIAction.messagesLoading] = false;
   }
 
-  async refreshCounter() {
-    if (!this.mailboxes.length) {
+  /**
+   * Send an encrypted text message to a specified guest
+   */
+  async sendMessage(guest: string, message: string): Promise<void> {
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    await this.activeMailbox.upload(this.relayURL, guest, message);
+    this.showBadge(UIAction.messageSent);
+    await this.refreshCounter();
+  }
+
+  /**
+   * Delete selected messages and files from the relay
+   */
+  async deleteMessages(): Promise<void> {
+    const messagesToDelete = this.activeMailbox.messages.filter(message => message.isSelected);
+    const noncesToDelete = messagesToDelete.map(message => message.nonce);
+    const fileIDsToDelete = messagesToDelete
+      .filter(message => message.kind === ZaxMessageKind.file)
+      .map((message: ZaxFileMessage) => message.uploadID);
+
+    // Delete files before deleting file messages
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    for (const uploadID of fileIDsToDelete) {
+      await this.activeMailbox.deleteFile(this.relayURL, uploadID);
+    }
+
+    // Delete file messages
+    await this.activeMailbox.delete(this.relayURL, noncesToDelete);
+
+    // Update messages list and counter without polling server
+    this.activeMailbox.messages = this.activeMailbox.messages.filter(message => !message.isSelected);
+    this.activeMailbox.counter = Object.keys(this.activeMailbox.messages).length;
+  }
+
+  // -------------------------
+  // File operations
+  // -------------------------
+
+  /**
+   * Send an encrypted file to a specified guest. Only single chunk is allowed for simplicity
+   */
+  async sendFile(guest: string): Promise<void> {
+    if (!this.selectedFile) {
       return;
     }
-    this.showRefreshLoader = true;
-    for (const mbx of this.mailboxes) {
-      await this.messageCount(mbx);
+
+    const binary = new Uint8Array(await this.selectedFile.arrayBuffer());
+    const metadata = {
+      name: this.selectedFile.name,
+      orig_size: this.selectedFile.size,
+      modified: this.selectedFile.lastModified
+    };
+
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    const { skey, uploadID, max_chunk_size } =
+      await this.activeMailbox.startFileUpload(this.relayURL, guest, metadata);
+
+    if (this.selectedFile.size >= max_chunk_size) {
+      alert(`Error, maximum file size is ${max_chunk_size} bytes`);
+      return;
     }
-    this.showRefreshLoader = false;
+
+    await this.activeMailbox.uploadFileChunk(this.relayURL, uploadID, binary, 0, 1, skey);
+    this.showBadge(UIAction.fileSent);
+    await this.refreshCounter();
   }
 
-  checkAll(event: { target: HTMLInputElement }) {
-    this.activeMailbox.messages.map(message => message.isSelected = event.target.checked);
+  /**
+   * Download the file and trigger browser's download capability
+   */
+  async downloadFile(message: ZaxFileMessage): Promise<void> {
+    await this.activeMailbox.connectToRelay(this.relayURL);
+    const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL,
+      message.uploadID, 0, message.data.skey);
+
+    // DOM trick to let browser start downloading the binary file
+    const url = window.URL.createObjectURL(new Blob([chunk]));
+    const link = document.createElement('a');
+    link.href = url;
+    // Use original file name
+    link.setAttribute('download', message.data.name);
+    document.body.appendChild(link);
+    link.click();
   }
 
-  async messageCount(mailbox) {
-    await mailbox.connectToRelay(this.relay);
-    const count = await mailbox.relayCount(this.relay);
-    mailbox.messageCount = count;
+  // -------------------------
+  // UI helpers
+  // -------------------------
+
+  selectAllMessages(target: HTMLInputElement): void {
+    this.activeMailbox.messages.map(message => message.isSelected = target.checked);
   }
 
-  async getMessages(mailbox) {
-    this.showMessagesLoader = true;
-    const messages = await mailbox.getRelayMessages(this.relay);
-    mailbox.messages = [];
-    for (const msg of messages) {
-      if (msg.kind === 'file') {
-        msg.data = '📎 File [uploadID: ' + JSON.parse(msg.data).uploadID + ']';
-      }
-      mailbox.messages.push(msg);
-    }
-    this.showMessagesLoader = false;
+  hasSelectedMessages(): boolean {
+    return !!this.activeMailbox.messages?.find(message => message.isSelected);
   }
 
-  async sendMessage(mailbox, form: NgForm) {
-    const { recipient, message } = form.controls;
-    await mailbox.sendToVia(recipient.value, this.relay, message.value);
-    this.messageSent = true;
+  private showBadge(action: UIAction) {
+    this.UIFlags[action] = true;
     setTimeout(() => {
-      this.messageSent = false;
+      this.UIFlags[action] = false;
     }, 3000);
-    form.reset();
-    this.refreshCounter();
-  }
-
-  async deleteMessages(mailbox) {
-    const noncesToDelete = mailbox.messages.filter(message => message.isSelected)
-      .map(message => message.nonce);
-    await mailbox.connectToRelay(this.relay);
-    await mailbox.relayDelete(noncesToDelete, this.relay);
-
-    mailbox.messages = mailbox.messages.filter(message => !message.isSelected);
-
-    // Update counter without polling server
-    mailbox.messageCount = Object.keys(mailbox.messages).length;
   }
 }
