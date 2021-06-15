@@ -13,10 +13,13 @@ enum UIAction {
   keyAdded,
   mailboxCreated,
   messageSent,
-  fileSent,
-  messagesLoading,
-  counterLoading
+  fileSent
 }
+
+// Set by default on Zax relays, hardcoded here for simplicity.
+// However for multi-chunk uploads it's better to rely on `max_chunk_size` value,
+// received from `startFileUpload` call
+const maxFileSize = 512000;
 
 @Component({
   selector: 'app-root',
@@ -40,13 +43,14 @@ export class AppComponent implements OnInit {
     [UIAction.keyAdded]: false,
     [UIAction.mailboxCreated]: false,
     [UIAction.messageSent]: false,
-    [UIAction.fileSent]: false,
-    [UIAction.messagesLoading]: false,
-    [UIAction.counterLoading]: false
+    [UIAction.fileSent]: false
   };
   relayURL: string;
   editingURL: string;
   isEditing = false;
+  showNewMailboxScreen = false;
+  showMessagesLoading = false;
+  showCounterLoading = false;
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
 
@@ -173,7 +177,7 @@ export class AppComponent implements OnInit {
    * Fetch the number of messages in all mailboxes, or in specifies ones
    */
   async refreshCounter(mailboxNames?: string[]): Promise<void> {
-    this.UIFlags[UIAction.counterLoading] = true;
+    this.showCounterLoading = true;
     // take either chosen names, or all mailboxes
     const mailboxes = mailboxNames ?
       this.mailboxes.filter(mailbox => mailboxNames.includes(mailbox.identity)) : this.mailboxes;
@@ -181,7 +185,7 @@ export class AppComponent implements OnInit {
       await mbx.connectToRelay(this.relayURL);
       mbx.counter = await mbx.count(this.relayURL);
     }
-    this.UIFlags[UIAction.counterLoading] = false;
+    this.showCounterLoading = false;
   }
 
   private async addMailbox(name: string, options?: { seed?: string, secret?: string }): Promise<string> {
@@ -226,10 +230,10 @@ export class AppComponent implements OnInit {
    * Fetch messages in a given mailbox from the relay
    */
   async getMessages(mailboxView: MailboxView): Promise<void> {
-    this.UIFlags[UIAction.messagesLoading] = true;
+    this.showMessagesLoading = true;
     await mailboxView.connectToRelay(this.relayURL);
     mailboxView.messages = await mailboxView.download(this.relayURL);
-    this.UIFlags[UIAction.messagesLoading] = false;
+    this.showMessagesLoading = false;
   }
 
   /**
@@ -278,6 +282,11 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    if (this.selectedFile.size >= maxFileSize) {
+      alert(`Error, maximum file size is ${maxFileSize} bytes`);
+      return;
+    }
+
     const binary = new Uint8Array(await this.selectedFile.arrayBuffer());
     const metadata = {
       name: this.selectedFile.name,
@@ -286,13 +295,7 @@ export class AppComponent implements OnInit {
     };
 
     await this.activeMailbox.connectToRelay(this.relayURL);
-    const { skey, uploadID, max_chunk_size } =
-      await this.activeMailbox.startFileUpload(this.relayURL, guest, metadata);
-
-    if (this.selectedFile.size >= max_chunk_size) {
-      alert(`Error, maximum file size is ${max_chunk_size} bytes`);
-      return;
-    }
+    const { skey, uploadID } = await this.activeMailbox.startFileUpload(this.relayURL, guest, metadata);
 
     await this.activeMailbox.uploadFileChunk(this.relayURL, uploadID, binary, 0, 1, skey);
     this.showBadge(UIAction.fileSent);
