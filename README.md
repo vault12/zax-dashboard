@@ -81,9 +81,11 @@ Run `npm run dist` to build the project. The build artifacts will be stored in t
 
 ## Ecosystem
 
-| [Zax](https://github.com/vault12/zax) | NaCl-based Cryptographic Relay |
-| [Glow](https://github.com/vault12/glow.ts) | Client library for interacting with Zax Cryptographic Relay |
-| [TrueEntropy](https://github.com/vault12/TrueEntropy) | High volume thermal entropy generator |
+Project | Description
+--- | ---
+[Zax](https://github.com/vault12/zax) | NaCl-based Cryptographic Relay
+[Glow](https://github.com/vault12/glow.ts) | Client library for interacting with Zax Cryptographic Relay
+[TrueEntropy](https://github.com/vault12/TrueEntropy) | High volume thermal entropy generator
 
 ## License
 
