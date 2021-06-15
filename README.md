@@ -73,7 +73,7 @@ Then navigate to `http://localhost:4200` in your browser. The app will automatic
 
 ## Configuration
 
-To change the default relay, modify private `setDefaultRelay()` method of [https://github.com/vault12/zax-dashboard/blob/master/src/app/app.component.ts](`app.component.ts`). By default, it uses the same domain where Zax Dashboard is running, but falls back to our test server when run on *localhost* or *Github Pages*.
+To change the default relay, modify private `setDefaultRelay()` method of [app.component.ts](https://github.com/vault12/zax-dashboard/blob/master/src/app/app.component.ts). By default, it uses the same domain where Zax Dashboard is running, but falls back to our test server when run on *localhost* or *Github Pages*.
 
 ## Build
 
@@ -81,8 +81,9 @@ Run `npm run dist` to build the project. The build artifacts will be stored in t
 
 ## Ecosystem
 
-- [Zax](https://github.com/vault12/zax): NaCl-based Cryptographic Relay
-- [Glow](https://github.com/vault12/glow.ts): Client library for interacting with Zax Cryptographic Relay
+| [Zax](https://github.com/vault12/zax) | NaCl-based Cryptographic Relay |
+| [Glow](https://github.com/vault12/glow.ts) | Client library for interacting with Zax Cryptographic Relay |
+| [TrueEntropy](https://github.com/vault12/TrueEntropy) | High volume thermal entropy generator |
 
 ## License
 
