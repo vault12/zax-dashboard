@@ -13,9 +13,7 @@ enum UIAction {
   keyAdded,
   mailboxCreated,
   messageSent,
-  fileSent,
-  messagesLoading,
-  counterLoading
+  fileSent
 }
 
 // Set by default on Zax relays, hardcoded here for simplicity.
@@ -45,14 +43,14 @@ export class AppComponent implements OnInit {
     [UIAction.keyAdded]: false,
     [UIAction.mailboxCreated]: false,
     [UIAction.messageSent]: false,
-    [UIAction.fileSent]: false,
-    [UIAction.messagesLoading]: false,
-    [UIAction.counterLoading]: false
+    [UIAction.fileSent]: false
   };
   relayURL: string;
   editingURL: string;
   isEditing = false;
   showNewMailboxScreen = false;
+  showMessagesLoading = false;
+  showCounterLoading = false;
   newMailboxSubscreen = 'new';
   viewMailboxSubscreen = 'inbox';
 
@@ -179,7 +177,7 @@ export class AppComponent implements OnInit {
    * Fetch the number of messages in all mailboxes, or in specifies ones
    */
   async refreshCounter(mailboxNames?: string[]): Promise<void> {
-    this.UIFlags[UIAction.counterLoading] = true;
+    this.showCounterLoading = true;
     // take either chosen names, or all mailboxes
     const mailboxes = mailboxNames ?
       this.mailboxes.filter(mailbox => mailboxNames.includes(mailbox.identity)) : this.mailboxes;
@@ -187,7 +185,7 @@ export class AppComponent implements OnInit {
       await mbx.connectToRelay(this.relayURL);
       mbx.counter = await mbx.count(this.relayURL);
     }
-    this.UIFlags[UIAction.counterLoading] = false;
+    this.showCounterLoading = false;
   }
 
   private async addMailbox(name: string, options?: { seed?: string, secret?: string }): Promise<string> {
@@ -232,10 +230,10 @@ export class AppComponent implements OnInit {
    * Fetch messages in a given mailbox from the relay
    */
   async getMessages(mailboxView: MailboxView): Promise<void> {
-    this.UIFlags[UIAction.messagesLoading] = true;
+    this.showMessagesLoading = true;
     await mailboxView.connectToRelay(this.relayURL);
     mailboxView.messages = await mailboxView.download(this.relayURL);
-    this.UIFlags[UIAction.messagesLoading] = false;
+    this.showMessagesLoading = false;
   }
 
   /**
