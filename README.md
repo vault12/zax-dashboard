@@ -32,7 +32,7 @@
   </a>
 </p>
 
-**Zax Dashboard** is a simple [Angular](https://angular.io) single page web app introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
+**Zax Dashboard** is a simple single page web app powered by [Angular](https://angular.io), introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
 
 ## Demo
 
@@ -45,6 +45,13 @@ You can also check the latest build of `master` branch on [Github Pages](https:/
 ### Node.js
 
 In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of [Node.js](https://nodejs.org) installed.
+
+### Features
+
+- Create mailboxes
+- Send and receive end-to-end encrypted messages between mailboxes
+- Send and receive encrypted files via [Zax 2.0 File Commands](https://github.com/vault12/zax/wiki/Zax-2.0-File-Commands)
+- Switch Zax relays on the fly
 
 ### Installation
 
@@ -64,9 +71,18 @@ npm run start
 
 Then navigate to `http://localhost:4200` in your browser. The app will automatically reload if you change any of the source files.
 
+## Configuration
+
+To change the default relay, modify private `setDefaultRelay()` method of [https://github.com/vault12/zax-dashboard/blob/master/src/app/app.component.ts](`app.component.ts`). By default, it uses the same domain where Zax Dashboard is running, but falls back to our test server when run on *localhost* or *Github Pages*.
+
 ## Build
 
 Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/).
+
+## Ecosystem
+
+- [Zax](https://github.com/vault12/zax): NaCl-based Cryptographic Relay
+- [Glow](https://github.com/vault12/glow.ts): Client library for interacting with Zax Cryptographic Relay
 
 ## License
 
