@@ -1,16 +1,57 @@
 # Zax Dashboard
 
-[![dependency Status](https://david-dm.org/ismaestro/angular8-example-app.svg)](https://david-dm.org/vault12/zax-dashboard#info=dependencies)
-[![devDependency Status](https://david-dm.org/ismaestro/angular8-example-app/dev-status.svg)](https://david-dm.org/vault12/zax-dashboard#info=devDependencies)
-[![demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://vault12.github.io/zax-dashboard/)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1370944/121530189-d7da7e80-ca05-11eb-9242-c564547b425a.jpg"
+    alt="Vault12 Zax Dashboard">
+</p>
 
-**Zax Dashboard** is a simple [Angular](https://angular.io) single page app to interact with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow](https://github.com/vault12/glow) library to provide a user-friendly access point to given relay internal mailboxes. We maintain a live [Test Server](https://z.vault12.com) that runs our latest build. For testing purposes expiration of any communication on that relay is set for 30 minutes. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
+<p align="center">
+  <a href="https://travis-ci.com/vault12/zax-dashboard">
+    <img src="https://travis-ci.com/vault12/zax-dashboard.svg?branch=master" alt="Travis Build Status" />
+  </a>
+  <a href="https://vault12.github.io/zax-dashboard/">
+    <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://david-dm.org/vault12/zax-dashboard#info=dependencies">
+    <img src="https://david-dm.org/vault12/zax-dashboard.svg" alt="dependency Status" />
+  </a>
+  <a href="https://david-dm.org/vault12/zax-dashboard#info=devDependencies">
+    <img src="https://david-dm.org/vault12/zax-dashboard/dev-status.svg" alt="devDependency Status" />
+  </a>
+  <a href="http://makeapullrequest.com">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
+  </a>
+  <a href="https://twitter.com/_Vault12_">
+    <img src="https://img.shields.io/twitter/follow/_Vault12_?label=Follow&style=social" alt="Follow" />
+  </a>
+</p>
+
+**Zax Dashboard** is a simple single page web app powered by [Angular](https://angular.io), introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
+
+## Demo
+
+We maintain a live [Test Server](https://zt.vault12.com) that runs the stable build of Zax Dashboard. For testing purposes expiration of any communication on that relay is set to *30 minutes*.
+
+You can also check the latest build of `master` branch on [Github Pages](https://vault12.github.io/zax-dashboard/).
+
+## Features
+
+- Create mailboxes
+- Send and receive end-to-end encrypted messages between mailboxes
+- Send and receive encrypted files via [Zax 2.0 File Commands](https://github.com/vault12/zax/wiki/Zax-2.0-File-Commands)
+- Switch Zax relays on the fly
 
 ## Getting started
 
-### NodeJS
+### Node.js
 
-In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of NodeJS installed.
+In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of [Node.js](https://nodejs.org) installed.
 
 ### Installation
 
@@ -30,9 +71,21 @@ npm run start
 
 Then navigate to `http://localhost:4200` in your browser. The app will automatically reload if you change any of the source files.
 
+## Configuration
+
+To change the default relay, modify private `setDefaultRelay()` method of [app.component.ts](https://github.com/vault12/zax-dashboard/blob/master/src/app/app.component.ts). By default, it uses the same domain where Zax Dashboard is running, but falls back to our test server when run on *localhost* or *Github Pages*.
+
 ## Build
 
-Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for **Github Pages**.
+Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/).
+
+## Ecosystem
+
+Project | Description
+--- | ---
+[Zax](https://github.com/vault12/zax) | NaCl-based Cryptographic Relay
+[Glow](https://github.com/vault12/glow.ts) | Client library for interacting with Zax Cryptographic Relay
+[TrueEntropy](https://github.com/vault12/TrueEntropy) | High volume thermal entropy generator
 
 ## License
 
