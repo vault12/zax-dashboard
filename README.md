@@ -40,18 +40,18 @@ We maintain a live [Test Server](https://zt.vault12.com) that runs the stable bu
 
 You can also check the latest build of `master` branch on [Github Pages](https://vault12.github.io/zax-dashboard/).
 
-## Getting started
-
-### Node.js
-
-In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of [Node.js](https://nodejs.org) installed.
-
-### Features
+## Features
 
 - Create mailboxes
 - Send and receive end-to-end encrypted messages between mailboxes
 - Send and receive encrypted files via [Zax 2.0 File Commands](https://github.com/vault12/zax/wiki/Zax-2.0-File-Commands)
 - Switch Zax relays on the fly
+
+## Getting started
+
+### Node.js
+
+In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of [Node.js](https://nodejs.org) installed.
 
 ### Installation
 
