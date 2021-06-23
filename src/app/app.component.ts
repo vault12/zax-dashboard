@@ -307,11 +307,23 @@ export class AppComponent implements OnInit {
    */
   async downloadFile(message: ZaxFileMessage): Promise<void> {
     await this.activeMailbox.connectToRelay(this.relayURL);
-    const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL,
-      message.uploadID, 0, message.data.skey);
+    const status = await this.activeMailbox.getFileStatus(this.relayURL, message.uploadID);
+    if (status.status !== 'COMPLETE') {
+      alert('This file is not yet ready to be downloaded, please re-upload it again');
+    }
+
+    const blob = new Uint8Array(status.file_size);
+    let writtenBytes = 0;
+
+    for (let i = 0; i < status.total_chunks; i++) {
+      const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL,
+        message.uploadID, i, message.data.skey);
+      blob.set(chunk, writtenBytes);
+      writtenBytes += chunk.length;
+    }
 
     // DOM trick to let browser start downloading the binary file
-    const url = window.URL.createObjectURL(new Blob([chunk]));
+    const url = window.URL.createObjectURL(new Blob([blob]));
     const link = document.createElement('a');
     link.href = url;
     // Use original file name
