@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage } from 'glow.ts';
+import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, CryptoStorage } from 'glow.ts';
 
 // Glow type extensions to represent data downloaded from the relay conveniently
 type MessageView = ZaxParsedMessage & { isSelected?: boolean };
@@ -59,7 +59,8 @@ export class AppComponent implements OnInit {
   // -------------------------
 
   async ngOnInit(): Promise<void> {
-    NaCl.setInstance();
+    NaCl.setDefaultInstance();
+    CryptoStorage.setDefaultStorageDriver();
     this.setDefaultRelay();
     await this.initMailboxes();
   }
