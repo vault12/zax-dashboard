@@ -20,8 +20,8 @@
     "@angular/router": "13.2.2",
     "bootstrap": "5.0.2",
     "bootswatch": "5.0.2",
-    "glow.ts": "1.0.0",
-    "rxjs": "6.6.7",
+    "glow.ts": "1.0.1",
+    "rxjs": "7.5.4",
     "zone.js": "0.11.4"
   },
   "devDependencies": {
