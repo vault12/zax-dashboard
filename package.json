@@ -21,6 +21,7 @@
     "bootstrap": "5.0.2",
     "bootswatch": "5.0.2",
     "glow.ts": "0.2.2",
+    "rxjs": "6.6.7",
     "zone.js": "0.11.4"
   },
   "devDependencies": {
