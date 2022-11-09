@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://travis-ci.com/vault12/zax-dashboard">
+  <a href="https://app.travis-ci.com/github/vault12/zax-dashboard">
     <img src="https://travis-ci.com/vault12/zax-dashboard.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="https://vault12.github.io/zax-dashboard/">
@@ -18,12 +18,6 @@
 </p>
 
 <p align="center">
-  <a href="https://david-dm.org/vault12/zax-dashboard#info=dependencies">
-    <img src="https://david-dm.org/vault12/zax-dashboard.svg" alt="dependency Status" />
-  </a>
-  <a href="https://david-dm.org/vault12/zax-dashboard#info=devDependencies">
-    <img src="https://david-dm.org/vault12/zax-dashboard/dev-status.svg" alt="devDependency Status" />
-  </a>
   <a href="http://makeapullrequest.com">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
   </a>
