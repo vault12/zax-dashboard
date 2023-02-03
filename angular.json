@@ -31,7 +31,8 @@
               "node_modules/bootstrap/dist/js/bootstrap.bundle.js"
             ],
             "allowedCommonJsDependencies": [
-              "tweetnacl"
+              "tweetnacl",
+              "js-sha256"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
