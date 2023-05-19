@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://app.travis-ci.com/github/vault12/zax-dashboard">
-    <img src="https://travis-ci.com/vault12/zax-dashboard.svg?branch=master" alt="Travis Build Status" />
+    <img src="https://github.com/vault12/zax-dashboard/actions/workflows/ci/badge.svg" alt="Github Actions Build Status" />
   </a>
   <a href="https://vault12.github.io/zax-dashboard/">
     <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
