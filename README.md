@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://app.travis-ci.com/github/vault12/zax-dashboard">
+  <a href="https://github.com/vault12/zax-dashboard/actions/workflows/ci.yml">
     <img src="https://github.com/vault12/zax-dashboard/actions/workflows/ci.yml/badge.svg" alt="Github Actions Build Status" />
   </a>
   <a href="https://vault12.github.io/zax-dashboard/">
