@@ -1,10 +1,10 @@
-name: Zax Dashboard
+name: build status
 on:
   push:
   pull_request:
 jobs:
   build:
-    name: Build Status
+    name: build status
     runs-on: ubuntu-latest
     env:
       # Force colored output in Github Actions logs
