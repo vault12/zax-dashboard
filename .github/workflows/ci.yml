@@ -4,7 +4,7 @@ on:
   pull_request:
 jobs:
   build:
-    name: Zax Dashboard
+    name: Build Status
     runs-on: ubuntu-latest
     env:
       # Force colored output in Github Actions logs
