@@ -66,7 +66,8 @@ export class AppComponent implements OnInit {
   }
 
   private setDefaultRelay() {
-    if (window.location.origin.indexOf('github.io') > -1 || window.location.origin.indexOf('localhost') > -1) {
+    const testRelayHostnames = ['vault12.github.io', 'localhost', '127.0.0.1'];
+    if (testRelayHostnames.includes(window.location.hostname)) {
       // Use test server by default when running on http://vault12.github.io/zax-dashboard/ or locally
       this.relayURL = 'https://zt.vault12.com';
     } else {
