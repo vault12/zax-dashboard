@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.5] - 2024-02-07
+
+### Changed
+
+- Updated Github Actions CI job.
+- Redirected all routes to the default one.
+- Updated Angular and dependencies versions.
+- Made the package public.
+
+### Fixed
+
+- Added support for 127.0.0.1 as a host name to run against a test relay.
+
 ## [1.0.4] - 2023-07-21
 
 ### Changed

@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { NoncePipe } from './nonce.pipe';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -14,9 +15,10 @@ import { NoncePipe } from './nonce.pipe';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    RouterModule.forRoot([{ path: '**', redirectTo: '' }])
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

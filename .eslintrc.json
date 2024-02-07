@@ -38,7 +38,8 @@
             "style": "camelCase",
             "type": "attribute"
           }
-        ]
+        ],
+        "quotes": ["error", "single", { "allowTemplateLiterals": true }]
       }
     },
     {

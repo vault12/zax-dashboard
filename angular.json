@@ -75,18 +75,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "zax-dashboard:build"
+            "buildTarget": "zax-dashboard:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "zax-dashboard:build:production"
+              "buildTarget": "zax-dashboard:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "zax-dashboard:build"
+            "buildTarget": "zax-dashboard:build"
           }
         },
         "lint": {
