@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Updated Github Actions CI job.
+
 ### Fixed
 
 - Added support for 127.0.0.1 as a host name to run against a test relay.
