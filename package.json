@@ -1,6 +1,6 @@
 {
   "name": "zax-dashboard",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
@@ -8,7 +8,6 @@
     "lint": "ng lint",
     "dist": "ng build --configuration production --base-href /zax-dashboard/"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "17.1.2",
     "@angular/common": "17.1.2",

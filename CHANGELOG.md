@@ -6,9 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.5] - 2024-02-07
+
 ### Changed
 
 - Updated Github Actions CI job.
+- Redirected all routes to the default one.
+- Updated Angular and dependencies versions.
+- Made the package public.
 
 ### Fixed
 
