@@ -1,12 +1,23 @@
 {
   "name": "zax-dashboard",
   "version": "1.0.5",
+  "author": "Vault12",
+  "license": "MIT",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
     "build": "ng build",
     "lint": "ng lint",
-    "dist": "ng build --configuration production --base-href /zax-dashboard/"
+    "github-pages": "ng build --configuration production --base-href /zax-dashboard/ --output-path docs",
+    "prepare": "rm -rf dist/ && ng build --configuration production",
+    "dist": "ng build --configuration production"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vault12/zax-dashboard.git"
   },
   "dependencies": {
     "@angular/animations": "17.1.2",
