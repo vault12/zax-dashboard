@@ -12,12 +12,15 @@
   <a href="https://vault12.github.io/zax-dashboard/">
     <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
   </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
+  <a href="https://npmjs.com/package/zax-dashboard">
+    <img src="https://img.shields.io/npm/v/zax-dashboard" alt="NPM Package" />
   </a>
 </p>
 
 <p align="center">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
+  </a>
   <a href="http://makeapullrequest.com">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
   </a>
@@ -71,7 +74,7 @@ To change the default relay, modify private `setDefaultRelay()` method of [app.c
 
 ## Build
 
-Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/).
+Run `npm run dist` to build the project. The build artifacts will be stored in the `dist/` directory. The `docs/` directory which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/) can be built with `npm run github-pages`.
 
 ## Ecosystem
 
