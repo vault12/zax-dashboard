@@ -12,12 +12,15 @@
   <a href="https://vault12.github.io/zax-dashboard/">
     <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
   </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
+  <a href="https://npmjs.com/package/zax-dashboard">
+    <img src="https://img.shields.io/npm/v/zax-dashboard" alt="NPM Package" />
   </a>
 </p>
 
 <p align="center">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
+  </a>
   <a href="http://makeapullrequest.com">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
   </a>
@@ -32,7 +35,7 @@
 
 We maintain a live [Test Server](https://zt.vault12.com) that runs the stable build of Zax Dashboard. For testing purposes expiration of any communication on that relay is set to *30 minutes*.
 
-You can also check the latest build of `master` branch on [Github Pages](https://vault12.github.io/zax-dashboard/).
+You can also check the latest build of `main` branch on [Github Pages](https://vault12.github.io/zax-dashboard/).
 
 ## Features
 
@@ -48,6 +51,14 @@ You can also check the latest build of `master` branch on [Github Pages](https:/
 In order to build and use **Zax Dashboard** from source, you need to have a relatively recent version of [Node.js](https://nodejs.org) installed.
 
 ### Installation
+
+Zax Dashboard can be easily installed via `npm`, which is included when you install [Node.js](https://nodejs.org/).
+In a terminal, navigate to the directory in which you'd like to install Glow and type the following:
+```Shell
+npm install zax-dashboard
+```
+
+### Development
 
 In a terminal, navigate to the directory in which you'd like to install **Zax Dashboard** and type the following:
 
@@ -67,11 +78,11 @@ Then navigate to `http://localhost:4200` in your browser. The app will automatic
 
 ## Configuration
 
-To change the default relay, modify private `setDefaultRelay()` method of [app.component.ts](https://github.com/vault12/zax-dashboard/blob/master/src/app/app.component.ts). By default, it uses the same domain where Zax Dashboard is running, but falls back to our test server when run on *localhost* or *Github Pages*.
+To change the default relay, modify private `setDefaultRelay()` method of [app.component.ts](https://github.com/vault12/zax-dashboard/blob/main/src/app/app.component.ts). By default, it uses the same domain where Zax Dashboard is running, but falls back to our test server when run on *localhost* or *Github Pages*.
 
 ## Build
 
-Run `npm run dist` to build the project. The build artifacts will be stored in the `docs/` directory, which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/).
+Run `npm run dist` to build the project. The build artifacts will be stored in the `dist/` directory. The `docs/` directory which serves as a root for [Github Pages](https://vault12.github.io/zax-dashboard/) can be built with `npm run github-pages`.
 
 ## Ecosystem
 
