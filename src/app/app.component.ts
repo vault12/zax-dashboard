@@ -58,11 +58,11 @@ export class AppComponent implements OnInit {
   // Initialization
   // -------------------------
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit() {
     NaCl.setDefaultInstance();
     CryptoStorage.setDefaultStorageDriver();
     this.setDefaultRelay();
-    await this.initMailboxes();
+    this.initMailboxes().catch(console.error);
   }
 
   private setDefaultRelay() {
