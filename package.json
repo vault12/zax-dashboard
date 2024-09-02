@@ -8,7 +8,7 @@
     "start": "ng serve --open",
     "build": "ng build",
     "lint": "ng lint",
-    "github-pages": "ng build --configuration production --base-href /zax-dashboard/ --output-path docs",
+    "github-pages": "ng build --configuration github",
     "prepare": "rm -rf dist/ && ng build --configuration production",
     "dist": "ng build --configuration production"
   },
