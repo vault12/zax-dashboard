@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.10] - 2024-09-23
+
+### Changed
+
+- Fixed npm audit issues.
+
+## [1.0.9] - 2024-09-02
+
+### Changed
+
+- Upgraded to Angular 18.
+- Fixed npm audit issues.
+
+## [1.0.8] - 2024-09-02
+
+### Changed
+
+- Fixed npm audit issues.
+
 ## [1.0.7] - 2024-05-02
 
 ### Changed
