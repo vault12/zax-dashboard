@@ -1,5 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, CryptoStorage } from 'glow.ts';
+import { NoncePipe } from './nonce.pipe';
 
 // Glow type extensions to represent data downloaded from the relay conveniently
 type MessageView = ZaxParsedMessage & { isSelected?: boolean };
@@ -24,7 +27,8 @@ const maxFileSize = 512000;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  imports: [FormsModule, CommonModule, NoncePipe]
 })
 export class AppComponent implements OnInit {
   // Needed to find in local storage and load all previously generated mailboxes
