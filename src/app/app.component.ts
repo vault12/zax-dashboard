@@ -5,7 +5,7 @@ import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, Crypto
 import { NoncePipe } from './nonce.pipe';
 
 // Glow type extensions to represent data downloaded from the relay conveniently
-type MessageView = ZaxParsedMessage & { isSelected?: boolean };
+type MessageView = ZaxParsedMessage & { isSelected?: boolean; from?: string };
 interface MailboxView extends Mailbox {
   counter?: number;
   messages?: MessageView[];

@@ -6,27 +6,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/vault12/zax-dashboard/actions/workflows/ci.yml">
-    <img src="https://github.com/vault12/zax-dashboard/actions/workflows/ci.yml/badge.svg" alt="Github Actions Build Status" />
-  </a>
-  <a href="https://vault12.github.io/zax-dashboard/">
-    <img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" />
-  </a>
-  <a href="https://npmjs.com/package/zax-dashboard">
-    <img src="https://img.shields.io/npm/v/zax-dashboard" alt="NPM Package" />
-  </a>
+  <a href="https://github.com/vault12/zax-dashboard/actions/workflows/ci.yml"><img src="https://github.com/vault12/zax-dashboard/actions/workflows/ci.yml/badge.svg" alt="Github Actions Build Status" /></a>
+  <a href="https://vault12.github.io/zax-dashboard/"><img src="https://img.shields.io/badge/demo-online-orange" alt="Demo Online" /></a>
+  <a href="https://npmjs.com/package/zax-dashboard"><img src="https://img.shields.io/npm/v/zax-dashboard" alt="NPM Package" /></a>
 </p>
 
 <p align="center">
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" />
-  </a>
-  <a href="http://makeapullrequest.com">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" />
-  </a>
-  <a href="https://twitter.com/_Vault12_">
-    <img src="https://img.shields.io/twitter/follow/_Vault12_?label=Follow&style=social" alt="Follow" />
-  </a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
+  <a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" /></a>
+  <a href="https://twitter.com/_Vault12_"><img src="https://img.shields.io/twitter/follow/_Vault12_?label=Follow&style=social" alt="Follow" /></a>
 </p>
 
 **Zax Dashboard** is a simple single page web app powered by [Angular](https://angular.io), introducing typical interactions with [Zax Relay](https://github.com/vault12/zax), a [NaCl-based Cryptographic Relay](https://s3-us-west-1.amazonaws.com/vault12/zax_infogfx.jpg). **Zax Dashboard** uses the [Glow.ts](https://github.com/vault12/glow.ts) library to provide a user-friendly access point to encrypted Mailboxes on a given relay. You can read the full [technical specification here](http://bit.ly/nacl_relay_spec).
