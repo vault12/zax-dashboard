@@ -54,7 +54,10 @@
                 }
               ],
               "optimization": {
-                "styles": false
+                "styles": false,
+                "fonts": {
+                  "inline": false
+                }
               },
               "outputHashing": "all",
               "sourceMap": false,
@@ -80,7 +83,10 @@
                 }
               ],
               "optimization": {
-                "styles": false
+                "styles": false,
+                "fonts": {
+                  "inline": false
+                }
               },
               "outputHashing": "all",
               "sourceMap": false,
