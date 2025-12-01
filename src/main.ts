@@ -12,7 +12,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideZoneChangeDetection(),provideHttpClient(withInterceptorsFromDi()),
+    provideZoneChangeDetection(), provideHttpClient(withInterceptorsFromDi()),
     provideRouter([{ path: '**', redirectTo: '' }])
   ]
 }).catch(err => console.error(err));
