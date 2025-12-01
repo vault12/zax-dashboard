@@ -14,11 +14,6 @@
     "typeRoots": [
       "node_modules/@types"
     ],
-    "lib": [
-      "ES2020.Promise",
-      "es2018",
-      "dom"
-    ],
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
