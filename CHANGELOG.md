@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.17] - 2026-02-27
+
+### Changed
+
+- Fixed npm audit issues.
+
 ## [1.0.16] - 2026-02-16
 
 ### Changed
