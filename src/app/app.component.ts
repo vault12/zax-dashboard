@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, CryptoStorage } from 'glow.ts';
 import { NoncePipe } from './nonce.pipe';
@@ -28,6 +28,10 @@ const maxFileSize = 512000;
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  // Angular 22 makes OnPush the default. This component drives the UI by mutating
+  // plain fields (no signals), so it needs the classic check-always behavior.
+  // eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, CommonModule, NoncePipe]
 })
 export class AppComponent implements OnInit {
@@ -115,7 +119,7 @@ export class AppComponent implements OnInit {
    * Create a new mailbox based on user's input and fetch the number of messages in it
    */
   async createMailbox(name: string, seed?: string, secret?: string): Promise<void> {
-    let mailboxName: string = null;
+    let mailboxName: string;
     if (seed) {
       mailboxName = await this.addMailbox(name, { seed });
     } else if (secret) {
@@ -202,7 +206,7 @@ export class AppComponent implements OnInit {
   }
 
   private async generateMailbox(name: string, options?: { seed?: string, secret?: string }) {
-    let mbx: MailboxView = null;
+    let mbx: MailboxView;
     if (options?.seed) {
       mbx = await Mailbox.fromSeed(name, options.seed);
     } else if (options?.secret) {
