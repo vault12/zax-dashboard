@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, CryptoStorage } from 'glow.ts';
 import { NoncePipe } from './nonce.pipe';
@@ -28,6 +28,10 @@ const maxFileSize = 512000;
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  // Angular 22 makes OnPush the default. This component drives the UI by mutating
+  // plain fields (no signals), so it needs the classic check-always behavior.
+  // eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, CommonModule, NoncePipe]
 })
 export class AppComponent implements OnInit {
