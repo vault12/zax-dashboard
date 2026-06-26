@@ -115,7 +115,7 @@ export class AppComponent implements OnInit {
    * Create a new mailbox based on user's input and fetch the number of messages in it
    */
   async createMailbox(name: string, seed?: string, secret?: string): Promise<void> {
-    let mailboxName: string = null;
+    let mailboxName: string;
     if (seed) {
       mailboxName = await this.addMailbox(name, { seed });
     } else if (secret) {
@@ -202,7 +202,7 @@ export class AppComponent implements OnInit {
   }
 
   private async generateMailbox(name: string, options?: { seed?: string, secret?: string }) {
-    let mbx: MailboxView = null;
+    let mbx: MailboxView;
     if (options?.seed) {
       mbx = await Mailbox.fromSeed(name, options.seed);
     } else if (options?.secret) {

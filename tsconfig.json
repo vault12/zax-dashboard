@@ -6,8 +6,6 @@
     "esModuleInterop": true,
     "declaration": false,
     "experimentalDecorators": true,
-    // TypeScript 6.0 made `strict` default to `true`; this project has always
-    // built in non-strict mode, so keep that posture explicitly across the upgrade.
     "strict": false,
     "module": "es2020",
     "moduleResolution": "bundler",
