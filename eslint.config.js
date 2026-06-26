@@ -4,7 +4,7 @@ const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 
 // Flat-config equivalent of the previous .eslintrc.json, required by
-// ESLint 9 + @angular-eslint 22 (legacy eslintrc is no longer supported).
+// ESLint 10 + @angular-eslint 22 (legacy eslintrc is no longer supported).
 module.exports = tseslint.config(
   {
     files: ['**/*.ts'],
