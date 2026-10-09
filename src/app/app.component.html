@@ -248,12 +248,17 @@
                   }
                   @if (message.kind === ZaxMessageKind.file) {
                   <div>
-                    <strong>📎 {{ message.data.name }}</strong>
-                    <span class="text-muted"> ({{ message.data.orig_size }} bytes)</span>
+                    @if (fileMetadata(message); as file) {
+                    <strong>📎 {{ file.name }}</strong>
+                    <span class="text-muted"> ({{ file.orig_size }} bytes)</span>
                     <div class="mt-2">
                       <button type="button" class="btn btn-outline-success" (click)="downloadFile(message)">
                         Download</button>
                     </div>
+                    } @else {
+                    <strong>📎 File</strong>
+                    <span class="text-muted"> (metadata in an unknown format, can not be downloaded)</span>
+                    }
                   </div>
                   }
                   <div class="collapse" [id]="message.nonce | nonce">

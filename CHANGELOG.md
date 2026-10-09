@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.21] - 2026-10-09
+
+### Changed
+
+- Updated glow.ts to 1.3.2. Received file metadata is no longer typed by glow, so the dashboard
+  checks for the `name`, `orig_size` and `skey` fields it sends before showing or downloading a file.
+- Updated Angular to 22.2.2, which fixes the npm audit findings in `@angular/router`
+  (GHSA-ff3f-86qr-9cv3) and `piscina` via `@angular/build` (GHSA-67c8-pqhq-4rmx).
+
+## [1.0.20] - 2026-09-23
+
+### Changed
+
+- Updated glow.ts to 1.3.0, which reports messages that fail authentication as a new `unverified` kind.
+- Updated Angular to 22.1 and zone.js to 0.16, and removed the unused `@angular/animations`
+  and `@angular/platform-browser-dynamic` packages.
+- Fixed npm audit issues.
+
+## [1.0.19] - 2026-06-26
+
+### Changed
+
+- Upgraded to Angular 22. The dashboard component keeps the classic check-always change detection,
+  since Angular 22 makes OnPush the default.
+- Migrated ESLint to version 10 with a flat config (`eslint.config.js`), using the `angular-eslint`
+  and `typescript-eslint` packages, and updated TypeScript to 6.
+- Fixed npm audit issues.
+
 ## [1.0.18] - 2026-03-31
 
 ### Changed

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, CryptoStorage } from 'glow.ts';
+import { Mailbox, NaCl, ZaxParsedMessage, ZaxMessageKind, ZaxFileMessage, ReceivedFileMetadata, CryptoStorage } from 'glow.ts';
 import { NoncePipe } from './nonce.pipe';
 
 // Glow type extensions to represent data downloaded from the relay conveniently
@@ -10,6 +10,17 @@ interface MailboxView extends Mailbox {
   counter?: number;
   messages?: MessageView[];
   recipients?: string[];
+}
+
+/**
+ * File metadata as this dashboard sends it in `sendFile`, plus the `skey` that glow adds on upload.
+ * Glow delivers received metadata as an opaque object, because its shape is a contract between
+ * the sender and the recipient (the relay never sees it), so it is narrowed to this type before use
+ */
+type FileMetadataView = { name: string; orig_size: number; skey: string };
+
+function isFileMetadataView(data: ReceivedFileMetadata): data is FileMetadataView {
+  return typeof data.name === 'string' && typeof data.orig_size === 'number' && typeof data.skey === 'string';
 }
 
 enum UIAction {
@@ -313,9 +324,22 @@ export class AppComponent implements OnInit {
   }
 
   /**
+   * Metadata of a received file message, or `null` when it was not sent by this dashboard:
+   * another client may use a different metadata contract, and without `skey` nothing can be decrypted
+   */
+  fileMetadata(message: ZaxFileMessage): FileMetadataView | null {
+    return isFileMetadataView(message.data) ? message.data : null;
+  }
+
+  /**
    * Download the file and trigger browser's download capability
    */
   async downloadFile(message: ZaxFileMessage): Promise<void> {
+    const file = this.fileMetadata(message);
+    if (!file) {
+      alert('This file can not be downloaded: its metadata has no name or decryption key');
+      return;
+    }
     await this.activeMailbox.connectToRelay(this.relayURL);
     const status = await this.activeMailbox.getFileStatus(this.relayURL, message.uploadID);
     if (status.status !== 'COMPLETE') {
@@ -327,7 +351,7 @@ export class AppComponent implements OnInit {
 
     for (let i = 0; i < status.total_chunks; i++) {
       const chunk = await this.activeMailbox.downloadFileChunk(this.relayURL,
-        message.uploadID, i, message.data.skey);
+        message.uploadID, i, file.skey);
       blob.set(chunk, writtenBytes);
       writtenBytes += chunk.length;
     }
@@ -337,7 +361,7 @@ export class AppComponent implements OnInit {
     const link = document.createElement('a');
     link.href = url;
     // Use original file name
-    link.setAttribute('download', message.data.name);
+    link.setAttribute('download', file.name);
     document.body.appendChild(link);
     link.click();
   }
