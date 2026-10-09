@@ -337,7 +337,7 @@ export class AppComponent implements OnInit {
   async downloadFile(message: ZaxFileMessage): Promise<void> {
     const file = this.fileMetadata(message);
     if (!file) {
-      alert('This file can not be downloaded: its metadata has no name or decryption key');
+      alert('This file cannot be downloaded: its metadata is in an unknown format');
       return;
     }
     await this.activeMailbox.connectToRelay(this.relayURL);
